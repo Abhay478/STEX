@@ -25,6 +25,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    dummys (id) {
+        id -> Int4,
+        a -> Nullable<Int4>,
+        b -> Nullable<Int4>,
+    }
+}
+
+diesel::table! {
     post_history (id) {
         id -> Int4,
         post_id -> Int4,
@@ -118,6 +126,7 @@ diesel::table! {
 diesel::allow_tables_to_appear_in_same_query!(
     badges,
     comments,
+    dummys,
     post_history,
     post_links,
     posts,

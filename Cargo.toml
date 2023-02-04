@@ -2,12 +2,23 @@
 name = "DBMS"
 version = "0.1.0"
 edition = "2021"
-RUSTFLAGS='-L /opt/homebrew/opt/libpq/lib'
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
 [dependencies]
-tokio = { version = "1", features = ["full"] }
-tokio-postgres = "0.7.7"
+actix-web = "4.3.0"
+actix-web-httpauth = "0.8.0"
+chrono = { version = "0.4.23", features = ["serde"] }
+derive_more = "0.99.17"
+diesel = { version = "2.0.3", features = ["postgres", "r2d2", "chrono"] }
+dotenvy = "0.15.6"
+futures = "0.3.26"
+r2d2 = "0.8.10"
+serde = "1.0.152"
+serde_derive = "1.0.152"
+serde_json = "1.0.91"
+actix-service = "2.0.2"
+alcoholic_jwt = "4091.0.0"
+reqwest = "0.11.14"
+actix-rt = "2.8.0"
 text_io = "0.1.12"
-diesel = { version = "2.0.0", features = ["postgres"] }
-dotenvy = "0.15"

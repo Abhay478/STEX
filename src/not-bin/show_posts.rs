@@ -5,7 +5,7 @@ use DBMS::*;
 use text_io::scan;
 
 fn main() {
-    use DBMS::schema::posts::dsl::*;
+    use DBMS::diesel_stex::schema::posts::dsl::*;
     let db = &mut connect();
     println!("Which?");
     let mut resp = String::new();

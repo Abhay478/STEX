@@ -107,3 +107,9 @@ CREATE TABLE tags (
 	tag_name VARCHAR(255) NOT NULL,
 	count INTEGER DEFAULT 0
 );
+
+create table dummys (
+	id serial primary key,
+	a integer,
+	b integer
+)

@@ -8,3 +8,4 @@ drop table post_history;
 drop table votes;
 drop table comments;
 drop table tags;
+drop table dummys;
