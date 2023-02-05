@@ -1,3 +1,4 @@
+#![recursion_limit = "256"]
 use actix_web::{HttpServer, App, web::{self, Data}};
 
 pub mod diesel_stex;
@@ -17,6 +18,8 @@ async fn main() -> std::io::Result<()> {
             .service(hey)
             .service(pfft)
             .service(meh)
+            .service(get_names)
+            .service(get_tags)
     })
     .bind(("localhost", 8080))?
     .run()

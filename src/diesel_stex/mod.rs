@@ -44,16 +44,21 @@
 // // }
 #![allow(unused_assignments)]
 #![allow(non_snake_case)]
+use actix_web::Responder;
 use diesel::pg::*;
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use dotenvy::dotenv;
 use std::env;
+use diesel::query_dsl::*;
 
 use crate::Pool;
+use crate::schema;
+
 
 use self::models::Dummy;
 use self::models::DummyRes;
+use self::models::DisplayPost;
 // use self::models::NewPost;
 // use self::models::Post;
 
@@ -92,4 +97,27 @@ pub fn accept(db: &mut PgConnection, req: (i32, i32)) -> DummyRes {
 
 pub fn accept_struct(db: &mut PgConnection, req: Dummy) -> DummyRes {
     diesel::insert_into(crate::schema::dummys::table).values(&req).get_result(db).unwrap()
+}
+
+pub fn get_all_dnames(db: &mut PgConnection) -> Vec<String> {
+    use crate::schema::users::display_name;
+    schema::users::dsl::users.select(display_name).load::<String>(db).unwrap()
+}
+
+pub fn get_all_tagnames(db: &mut PgConnection) -> Vec<String> {
+    use crate::schema::tags::tag_name;
+    schema::tags::dsl::tags.select(tag_name).load::<String>(db).unwrap()
+}
+
+enum PSC {
+    UID(usize),
+    UTG(String),
+    VTG(Vec<String>)
+}
+
+pub fn post_search(db: &mut PgConnection, crit: PSC) -> Vec<DisplayPost> {
+    match crit {
+        PSC::UID(x) => {schema::posts::dsl::posts.filter(schema::posts::owner_user_id.eq(Some(x))).get_results::<DisplayPost>(db).unwrap()},
+        PSC::UTG(t) => 
+    }
 }
