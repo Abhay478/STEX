@@ -100,24 +100,21 @@ pub fn accept_struct(db: &mut PgConnection, req: Dummy) -> DummyRes {
 }
 
 pub fn get_all_dnames(db: &mut PgConnection) -> Vec<String> {
-    use crate::schema::users::display_name;
-    schema::users::dsl::users.select(display_name).load::<String>(db).unwrap()
+    use crate::schema::users::{display_name, dsl};
+    dsl::users.select(display_name).load::<String>(db).unwrap()
+}
+
+pub fn get_all_pnames(db: &mut PgConnection) -> Vec<Option<String>> {
+    use crate::schema::posts::{title, dsl};
+    dsl::posts.select(title).filter(title.is_not_null()).load::<Option<String>>(db).unwrap()
 }
 
 pub fn get_all_tagnames(db: &mut PgConnection) -> Vec<String> {
-    use crate::schema::tags::tag_name;
-    schema::tags::dsl::tags.select(tag_name).load::<String>(db).unwrap()
+    use crate::schema::tags::{tag_name, dsl};
+    dsl::tags.select(tag_name).load::<String>(db).unwrap()
 }
 
-enum PSC {
-    UID(usize),
-    UTG(String),
-    VTG(Vec<String>)
+pub fn post_search_title(db: &mut PgConnection, req: String) -> Vec<DisplayPost>{
+    use crate::schema::posts::*;
+    dsl::posts.filter(title.eq(req)).get_results::<DisplayPost>(db).unwrap()
 }
-
-// pub fn post_search(db: &mut PgConnection, crit: PSC) -> Vec<DisplayPost> {
-//     match crit {
-//         PSC::UID(x) => {schema::posts::dsl::posts.filter(schema::posts::owner_user_id.eq(Some(x))).get_results::<DisplayPost>(db).unwrap()},
-//         PSC::UTG(t) => 
-//     }
-// }

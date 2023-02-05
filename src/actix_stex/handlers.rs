@@ -1,7 +1,10 @@
+use std::str::Chars;
+
 use actix_web::{get, post, web::{self, Json}, App, HttpResponse, HttpServer, Responder, body::{BodyStream, BoxBody}};
 use diesel::PgConnection;
+use serde::ser::SerializeStruct;
 
-use crate::{Pool, diesel_stex::models::{Dummy, User}};
+use crate::{Pool, diesel_stex::models::{Dummy, User, DisplayPost}};
 
 #[get("/")]
 pub async fn hello() -> impl Responder {
@@ -31,14 +34,29 @@ pub async fn meh(db: web::Data<Pool>, req: web::Json<Dummy>) -> impl Responder {
     HttpResponse::Ok().body("Done.")
 }
 
-#[get("auto/u")]
+#[get("/auto/u")]
 pub async fn get_names(db: web::Data<Pool>) -> impl Responder {
-    let all = crate::diesel_stex::get_all_dnames(&mut db.get().unwrap()).iter().map(|s| Json(s.to_string())).collect::<Vec<Json<String>>>();
-    HttpResponse::Ok().body(all.iter().flat_map(|s| {let mut l = s.as_bytes().to_vec(); l.append(&mut vec![10 as u8]); l}).collect::<Vec<u8>>())
+    let all = crate::diesel_stex::get_all_dnames(&mut db.get().unwrap());
+    // HttpResponse::Ok().body(all.iter().flat_map(|s| {let mut l = s.as_bytes().to_vec(); l.append(&mut vec![10 as u8]); l}).collect::<Vec<u8>>())
+    HttpResponse::Ok().body(serde_json::to_string(&all).unwrap())
 }
 
-#[get("auto/t")]
+#[get("/auto/t")]
 pub async fn get_tags(db: web::Data<Pool>) -> impl Responder {
-    let all = crate::diesel_stex::get_all_tagnames(&mut db.get().unwrap()).iter().map(|s| Json(s.to_string())).collect::<Vec<Json<String>>>();
-    HttpResponse::Ok().body(all.iter().flat_map(|s| {let mut l = s.as_bytes().to_vec(); l.append(&mut vec![10 as u8]); l}).collect::<Vec<u8>>())
+    let all = crate::diesel_stex::get_all_tagnames(&mut db.get().unwrap());
+    // HttpResponse::Ok().body(all.iter().flat_map(|s| {let mut l = s.as_bytes().to_vec(); l.append(&mut vec![10 as u8]); l}).collect::<Vec<u8>>())
+    HttpResponse::Ok().body(serde_json::to_string(&all).unwrap())
+}
+
+#[get("/auto/p")]
+pub async fn get_posts(db: web::Data<Pool>) -> impl Responder {
+    let mut all = crate::diesel_stex::get_all_pnames(&mut db.get().unwrap());
+    // let all = all.iter().filter(|&mut s| s.is_some()).map(|&mut s| s.take().unwrap()).collect::<Vec<String>>();
+    HttpResponse::Ok().body(serde_json::to_string(&all).unwrap())
+}
+
+#[post("/sr/ptitle")]
+pub async fn get_post_by_title(db: web::Data<Pool>, title: String) -> impl Responder {
+    let post = crate::diesel_stex::post_search_title(&mut db.get().unwrap(), title);
+    HttpResponse::Ok().body(serde_json::to_string(&post).unwrap())
 }

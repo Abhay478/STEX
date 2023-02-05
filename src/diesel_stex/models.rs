@@ -44,34 +44,35 @@ pub struct Tag {
 // #[derive(Queryable, Serialize, Deserialize)]
 // #[diesel(table_name = posts)]
 // pub struct SearchPost {
-//     pub id: usize,
+//     pub id: i32,
 //     pub tags: Vec<String>,
 // }
 
 #[derive(Queryable, Serialize, Deserialize)]
 #[diesel(table_name = posts)]
 pub struct DisplayPost {
-    pub id: usize,
-    pub tags: Vec<String>,
-    pub body: Option<String>,
-    pub title: Option<String>,
-    pub view_count: Option<usize>,
-    pub creation_date: DateTime<Utc>,
-    pub community_owned_date: Option<DateTime<Utc>>,
-    pub closed_date: Option<DateTime<Utc>>,
-    pub last_edit_date: Option<DateTime<Utc>>,
-    pub last_activity_date: Option<DateTime<Utc>>,
-    pub score: usize, 
+    pub id: i32,
+    pub owner_user_id: Option<i32>,
+    pub last_editor_user_id: Option<i32>,
+    pub post_type_id: i16,
+    pub accepted_answer_id: Option<i32>,
+    pub score: i32, 
+    pub parent_id: Option<i32>,
+    pub view_count: Option<i32>,
+    pub answer_count: Option<i32>,
+    pub comment_count: Option<i32>,
     pub owner_display_name: Option<String>,
-    pub accepted_answer_id: Option<usize>,
-    pub last_editor_user_id: Option<usize>,
-    pub post_type_id: usize,
-    pub parent_id: Option<usize>,
-    pub answer_count: Option<usize>,
-    pub comment_count: Option<usize>,
     pub last_editor_display_name: Option<String>,
+    pub title: Option<String>,
+    pub tags: Option<String>,
     pub content_license: String,
-    pub favorite_count: Option<usize>,
+    pub body: Option<String>,
+    pub favorite_count: Option<i32>,
+    pub creation_date: NaiveDateTime,
+    pub community_owned_date: Option<NaiveDateTime>,
+    pub closed_date: Option<NaiveDateTime>,
+    pub last_edit_date: Option<NaiveDateTime>,
+    pub last_activity_date: Option<NaiveDateTime>,
 }
 
 // #[derive(Insertable)]
