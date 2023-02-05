@@ -118,3 +118,8 @@ pub fn post_search_title(db: &mut PgConnection, req: String) -> Vec<DisplayPost>
     use crate::schema::posts::*;
     dsl::posts.filter(title.eq(req)).get_results::<DisplayPost>(db).unwrap()
 }
+
+pub fn post_search_owner(db: &mut PgConnection, req: i32) -> Vec<DisplayPost>{
+    use crate::schema::posts::*;
+    dsl::posts.filter(owner_user_id.eq(req)).get_results::<DisplayPost>(db).unwrap()
+}

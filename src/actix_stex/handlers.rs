@@ -60,3 +60,9 @@ pub async fn get_post_by_title(db: web::Data<Pool>, title: String) -> impl Respo
     let post = crate::diesel_stex::post_search_title(&mut db.get().unwrap(), title);
     HttpResponse::Ok().body(serde_json::to_string(&post).unwrap())
 }
+
+#[post("/sr/powner")]
+pub async fn get_post_by_owner(db: web::Data<Pool>, oid: Json<i32>) -> impl Responder {
+    let post = crate::diesel_stex::post_search_owner(&mut db.get().unwrap(), *oid);
+    HttpResponse::Ok().body(serde_json::to_string(&post).unwrap())
+}

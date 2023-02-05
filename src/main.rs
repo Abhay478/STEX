@@ -22,6 +22,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_tags)
             .service(get_posts)
             .service(get_post_by_title)
+            .service(get_post_by_owner)
     })
     .bind(("localhost", 8080))?
     .run()
