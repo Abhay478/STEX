@@ -115,9 +115,9 @@ enum PSC {
     VTG(Vec<String>)
 }
 
-pub fn post_search(db: &mut PgConnection, crit: PSC) -> Vec<DisplayPost> {
-    match crit {
-        PSC::UID(x) => {schema::posts::dsl::posts.filter(schema::posts::owner_user_id.eq(Some(x))).get_results::<DisplayPost>(db).unwrap()},
-        PSC::UTG(t) => 
-    }
-}
+// pub fn post_search(db: &mut PgConnection, crit: PSC) -> Vec<DisplayPost> {
+//     match crit {
+//         PSC::UID(x) => {schema::posts::dsl::posts.filter(schema::posts::owner_user_id.eq(Some(x))).get_results::<DisplayPost>(db).unwrap()},
+//         PSC::UTG(t) => 
+//     }
+// }
