@@ -98,17 +98,17 @@ pub fn accept_struct(db: &mut PgConnection, req: Dummy) -> DummyRes {
 
 pub fn get_all_dnames(db: &mut PgConnection, prefix: String) -> Vec<String> {
     use crate::schema::users::{display_name, dsl};
-    dsl::users.select(display_name).filter(display_name.like(prefix + "%")).load::<String>(db).unwrap()
+    dsl::users.select(display_name).filter(display_name.like("%".to_string() + prefix.as_str() + "%")).load::<String>(db).unwrap()
 }
 
 pub fn get_all_pnames(db: &mut PgConnection, prefix: String) -> Vec<Option<String>> {
     use crate::schema::posts::{title, dsl};
-    dsl::posts.select(title).filter(title.is_not_null()).filter(title.like(prefix + "%")).load::<Option<String>>(db).unwrap()
+    dsl::posts.select(title).filter(title.is_not_null()).filter(title.like("%".to_string() + prefix.as_str() + "%")).load::<Option<String>>(db).unwrap()
 }
 
 pub fn get_all_tagnames(db: &mut PgConnection, prefix: String) -> Vec<String> {
     use crate::schema::tags::{tag_name, dsl};
-    dsl::tags.select(tag_name).filter(tag_name.like(prefix + "%")).load::<String>(db).unwrap()
+    dsl::tags.select(tag_name).filter(tag_name.like("%".to_string() + prefix.as_str() + "%")).load::<String>(db).unwrap()
 }
 
 pub fn post_search_title(db: &mut PgConnection, req: String) -> Vec<DisplayPost>{
