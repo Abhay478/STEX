@@ -1,5 +1,6 @@
+#![allow(non_snake_case)]
 #![recursion_limit = "256"]
-use actix_web::{HttpServer, App, web::{self, Data}};
+use actix_web::{HttpServer, App, web::Data};
 
 pub mod diesel_stex;
 pub mod actix_stex;

@@ -44,16 +44,13 @@
 // // }
 #![allow(unused_assignments)]
 #![allow(non_snake_case)]
-use actix_web::Responder;
 use diesel::pg::*;
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use dotenvy::dotenv;
 use std::env;
-use diesel::query_dsl::*;
 
 use crate::Pool;
-use crate::schema;
 
 
 use self::models::Dummy;

@@ -1,10 +1,8 @@
-use std::str::Chars;
 
-use actix_web::{get, post, web::{self, Json}, App, HttpResponse, HttpServer, Responder, body::{BodyStream, BoxBody}};
-use diesel::PgConnection;
-use serde::ser::SerializeStruct;
 
-use crate::{Pool, diesel_stex::models::{Dummy, User, DisplayPost}};
+use actix_web::{get, post, web::{self, Json}, HttpResponse, Responder};
+
+use crate::{Pool, diesel_stex::models::Dummy};
 
 #[get("/")]
 pub async fn hello() -> impl Responder {
@@ -50,7 +48,7 @@ pub async fn get_tags(db: web::Data<Pool>) -> impl Responder {
 
 #[get("/auto/p")]
 pub async fn get_posts(db: web::Data<Pool>) -> impl Responder {
-    let mut all = crate::diesel_stex::get_all_pnames(&mut db.get().unwrap());
+    let all = crate::diesel_stex::get_all_pnames(&mut db.get().unwrap());
     // let all = all.iter().filter(|&mut s| s.is_some()).map(|&mut s| s.take().unwrap()).collect::<Vec<String>>();
     HttpResponse::Ok().body(serde_json::to_string(&all).unwrap())
 }

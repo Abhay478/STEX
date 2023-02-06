@@ -1,8 +1,7 @@
-use chrono::{NaiveDateTime, DateTime, TimeZone, FixedOffset, Utc};
-use diesel::{prelude::*, FromSqlRow, AsExpression};
+use chrono::NaiveDateTime;
+use diesel::prelude::*;
 use serde_derive::{Deserialize, Serialize};
 use crate::schema::*;
-use diesel::sql_types::{Nullable, Timestamp};
 // use diesel::deserialize::{self, FromSql};
 
 // #[derive(Queryable, Debug)]
