@@ -51,11 +51,14 @@ use dotenvy::dotenv;
 use std::env;
 
 use crate::Pool;
+use crate::diesel_stex::models::AutocResults;
 
 
-use self::models::Dummy;
-use self::models::DummyRes;
+// use self::models::AutocParamsAll;
+// use self::models::Dummy;
+// use self::models::DummyRes;
 use self::models::DisplayPost;
+use self::models::NewPost;
 // use self::models::NewPost;
 // use self::models::Post;
 
@@ -82,41 +85,62 @@ pub fn connect() -> Pool {
 //     diesel::update(posts::table.filter(posts::title.eq(title))).set(posts::published.eq(true)).get_result(db).unwrap()
 // }
 
-pub fn push(db: &mut PgConnection) -> DummyRes {
-    let new = Dummy {a: 1, b: 2};
-    diesel::insert_into(crate::schema::dummys::table).values(&new).get_result(db).unwrap()
+// pub fn push(db: &mut PgConnection) -> DummyRes {
+//     let new = Dummy {a: 1, b: 2};
+//     diesel::insert_into(crate::schema::dummys::table).values(&new).get_result(db).unwrap()
+// }
+
+// pub fn accept(db: &mut PgConnection, req: (i32, i32)) -> DummyRes {
+//     let new = Dummy {a: req.0, b: req.1};
+//     diesel::insert_into(crate::schema::dummys::table).values(&new).get_result(db).unwrap()
+// }
+
+// pub fn accept_struct(db: &mut PgConnection, req: Dummy) -> DummyRes {
+//     diesel::insert_into(crate::schema::dummys::table).values(&req).get_result(db).unwrap()
+// }
+
+pub fn get_all_dnames(db: &mut PgConnection, prefix: &str) -> Vec<AutocResults> {
+    use crate::schema::users::{display_name, dsl, id};
+    dsl::users.select((id, display_name)).filter(display_name.like(format!("%{prefix}%"))).load::<AutocResults>(db).unwrap()
 }
 
-pub fn accept(db: &mut PgConnection, req: (i32, i32)) -> DummyRes {
-    let new = Dummy {a: req.0, b: req.1};
-    diesel::insert_into(crate::schema::dummys::table).values(&new).get_result(db).unwrap()
+pub fn get_all_pnames(db: &mut PgConnection, prefix: &str) -> Vec<AutocResults> {
+    use crate::schema::posts::{title, dsl, id};
+    dsl::posts.select((id, title.assume_not_null())).filter(title.is_not_null()).filter(title.like(format!("%{prefix}%"))).load::<AutocResults>(db).unwrap()
 }
 
-pub fn accept_struct(db: &mut PgConnection, req: Dummy) -> DummyRes {
-    diesel::insert_into(crate::schema::dummys::table).values(&req).get_result(db).unwrap()
+pub fn get_all_tagnames(db: &mut PgConnection, prefix: &str) -> Vec<AutocResults> {
+    use crate::schema::tags::{tag_name, dsl, id};
+    dsl::tags.select((id, tag_name)).filter(tag_name.like(format!("%{prefix}%"))).load::<AutocResults>(db).unwrap()
 }
 
-pub fn get_all_dnames(db: &mut PgConnection, prefix: String) -> Vec<String> {
-    use crate::schema::users::{display_name, dsl};
-    dsl::users.select(display_name).filter(display_name.like("%".to_string() + prefix.as_str() + "%")).load::<String>(db).unwrap()
-}
-
-pub fn get_all_pnames(db: &mut PgConnection, prefix: String) -> Vec<Option<String>> {
-    use crate::schema::posts::{title, dsl};
-    dsl::posts.select(title).filter(title.is_not_null()).filter(title.like("%".to_string() + prefix.as_str() + "%")).load::<Option<String>>(db).unwrap()
-}
-
-pub fn get_all_tagnames(db: &mut PgConnection, prefix: String) -> Vec<String> {
-    use crate::schema::tags::{tag_name, dsl};
-    dsl::tags.select(tag_name).filter(tag_name.like("%".to_string() + prefix.as_str() + "%")).load::<String>(db).unwrap()
-}
-
-pub fn post_search_title(db: &mut PgConnection, req: String) -> Vec<DisplayPost>{
+pub fn post_search_title(db: &mut PgConnection, req: &str) -> Vec<DisplayPost>{
     use crate::schema::posts::*;
     dsl::posts.filter(title.eq(req)).get_results::<DisplayPost>(db).unwrap()
 }
 
-pub fn post_search_owner(db: &mut PgConnection, req: i32) -> Vec<DisplayPost>{
+pub fn post_search_owner(db: &mut PgConnection, req: i32) -> Vec<DisplayPost> {
     use crate::schema::posts::*;
     dsl::posts.filter(owner_user_id.eq(req)).get_results::<DisplayPost>(db).unwrap()
+}
+
+pub fn post_search_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPost> {
+    use crate::schema::posts::{*, dsl::posts};
+    posts.filter(tags.like(format!("%{req}%"))).get_results::<DisplayPost>(db).unwrap()
+}
+
+pub fn post_search_many_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPost> {
+    use crate::schema::posts::{*, dsl::posts};
+    posts.filter(tags.similar_to(format!("%{req}%"))).get_results::<DisplayPost>(db).unwrap()
+}
+
+// pub fn nuanced_search(db: &mut PgConnection, req: AutocParamsAll) -> Vec<DisplayPost> {
+//     use crate::schema::posts::{*, dsl::posts};
+//     posts.filter(tags.like(format!("%{}%", req.tag))).filter(owner_user_id.eq(req.uid)).filter(title.like(format!("%{}%", req.title))).get_results::<DisplayPost>(db).unwrap()
+// }
+
+pub fn new_post(db: &mut PgConnection, new: &NewPost) -> Result<DisplayPost, diesel::result::Error> {
+    use crate::schema::posts::dsl::posts;
+    diesel::insert_into(posts).values(new).get_result(db)
+
 }

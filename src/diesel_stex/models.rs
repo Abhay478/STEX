@@ -19,6 +19,30 @@ pub struct Dummy {
     pub b: i32
 }
 
+#[derive(Deserialize, Serialize, Queryable, Debug)]
+pub struct AutocParams {
+    pub q: String
+}
+
+#[derive(Deserialize, Serialize, Queryable, Debug)]
+pub struct AutocParamsInt {
+    pub q: usize
+}
+
+#[derive(Deserialize, Serialize, Queryable, Debug)]
+pub struct AutocParamsAll {
+    pub tag: String, //try and make it &str later
+    pub uid: i32,
+    pub title: String
+
+}
+
+#[derive(Deserialize, Serialize, Queryable, Debug)]
+pub struct AutocResults {
+    pub id: i32,
+    pub text: String
+}
+
 #[derive(Queryable)]
 pub struct DummyRes {
     pub id: i32,
@@ -72,6 +96,17 @@ pub struct DisplayPost {
     pub closed_date: Option<NaiveDateTime>,
     pub last_edit_date: Option<NaiveDateTime>,
     pub last_activity_date: Option<NaiveDateTime>,
+}
+
+#[derive(Insertable, Serialize, Deserialize)]
+#[diesel(table_name = posts)]
+pub struct NewPost {
+    pub id: i32,
+    pub owner_user_id: Option<i32>,
+    pub title: Option<String>,
+    pub tags: Option<String>,
+    pub body: Option<String>,
+    pub creation_date: NaiveDateTime,
 }
 
 // #[derive(Insertable)]
