@@ -103,11 +103,31 @@ pub struct DisplayPost {
 pub struct NewPost {
     pub id: i32,
     pub owner_user_id: Option<i32>,
+    pub post_type_id: i16,
     pub title: Option<String>,
     pub tags: Option<String>,
     pub body: Option<String>,
+    pub score: i32,
+    pub content_license: String,
     pub creation_date: NaiveDateTime,
 }
+
+#[derive(Insertable, Serialize, Deserialize)]
+#[diesel(table_name = posts)]
+pub struct AnswerPost {
+    pub id: i32,
+    pub owner_user_id: Option<i32>,
+    pub post_type_id: i16,
+    pub title: Option<String>,
+    pub tags: Option<String>,
+    pub body: Option<String>,
+    pub score: i32,
+    pub parent_id: Option<i32>,
+    pub content_license: String,
+    pub creation_date: NaiveDateTime,
+}
+
+
 
 // #[derive(Insertable)]
 // #[diesel(table_name = posts)]

@@ -52,6 +52,7 @@ use std::env;
 
 use crate::Pool;
 use crate::diesel_stex::models::AutocResults;
+use crate::diesel_stex::models::AnswerPost;
 
 
 // use self::models::AutocParamsAll;
@@ -142,5 +143,16 @@ pub fn post_search_many_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPos
 pub fn new_post(db: &mut PgConnection, new: &NewPost) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::posts;
     diesel::insert_into(posts).values(new).get_result(db)
+}
 
+pub fn answer(db: &mut PgConnection, new: &AnswerPost) -> Result<DisplayPost, diesel::result::Error> {
+    use crate::schema::posts::dsl::posts;
+    diesel::insert_into(posts).values(new).get_result(db)
+}
+
+
+// et cetera. Design choice later.
+pub fn update(db: &mut PgConnection, new: &DisplayPost) -> Result<DisplayPost, diesel::result::Error> {
+    use crate::schema::posts::dsl::*;
+    diesel::update(posts.filter(id.eq(new.id))).set(closed_date.eq(new.closed_date)).get_result(db)
 }

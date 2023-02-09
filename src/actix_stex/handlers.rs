@@ -101,7 +101,25 @@ pub async fn insert_post(db: web::Data<Pool>, new: web::Json<NewPost>) -> impl R
     let post = crate::diesel_stex::new_post(&mut db.get().unwrap(), &new.0);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
-        Err(_) => HttpResponse::Ok().json("Can't do that.")
+        Err(e) => HttpResponse::Ok().json(format!("Can't do that: {}.", e.to_string()))
+    }
+}
+
+#[post("/post/answer")]
+pub async fn answer_to_post(db: web::Data<Pool>, new: web::Json<AnswerPost>) -> impl Responder {
+    let post = crate::diesel_stex::answer(&mut db.get().unwrap(), &new.0);
+    match post {
+        Ok(p) => HttpResponse::Ok().json(p),
+        Err(e) => HttpResponse::Ok().json(format!("Can't do that: {}.", e.to_string()))
+    }
+}
+
+#[post("/post/update")]
+pub async fn update_post(db: web::Data<Pool>, new: web::Json<DisplayPost>) -> impl Responder {
+    let post = crate::diesel_stex::update(&mut db.get().unwrap(), &new.0);
+    match post {
+        Ok(p) => HttpResponse::Ok().json(p),
+        Err(e) => HttpResponse::Ok().json(format!("Can't do that: {}.", e.to_string()))
     }
 }
 // #[get("/search")]
