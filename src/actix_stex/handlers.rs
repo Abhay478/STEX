@@ -1,6 +1,6 @@
 
 
-use actix_web::{get, post, web::{self}, HttpResponse, Responder};
+use actix_web::{get, post, web::{self}, HttpResponse, Responder, delete};
 
 use crate::{Pool, diesel_stex::models::*};
 
@@ -115,15 +115,19 @@ pub async fn answer_to_post(db: web::Data<Pool>, new: web::Json<AnswerPost>) -> 
 }
 
 #[post("/post/update")]
-pub async fn update_post(db: web::Data<Pool>, new: web::Json<DisplayPost>) -> impl Responder {
+pub async fn update_post(db: web::Data<Pool>, new: web::Json<NewPost>) -> impl Responder {
     let post = crate::diesel_stex::update(&mut db.get().unwrap(), &new.0);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
-        Err(e) => HttpResponse::Ok().json(format!("Can't do that: {}.", e.to_string()))
+        Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string()))
     }
 }
-// #[get("/search")]
-// pub async fn get_post_nuanced(db: web::Data<Pool>, filt: web::Query<AutocParamsAll>) -> impl Responder {
-//     let post = crate::diesel_stex::nuanced_search(&mut db.get().unwrap(), filt.0);
-//     HttpResponse::Ok().json(post)
-// }
+
+#[delete("/post/delete")]
+pub async fn delete_post(db: web::Data<Pool>, kill: web::Query<AutocParamsInt>) -> impl Responder {
+    let post = crate::diesel_stex::delete(&mut db.get().unwrap(), &(kill.q as i32));
+    match post {
+        Ok(p) => HttpResponse::Ok().json(p),
+        Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string()))
+    }
+}

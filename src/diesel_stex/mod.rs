@@ -150,9 +150,13 @@ pub fn answer(db: &mut PgConnection, new: &AnswerPost) -> Result<DisplayPost, di
     diesel::insert_into(posts).values(new).get_result(db)
 }
 
-
 // et cetera. Design choice later.
-pub fn update(db: &mut PgConnection, new: &DisplayPost) -> Result<DisplayPost, diesel::result::Error> {
+pub fn update(db: &mut PgConnection, new: &NewPost) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
-    diesel::update(posts.filter(id.eq(new.id))).set(closed_date.eq(new.closed_date)).get_result(db)
+    diesel::update(posts.filter(id.eq(new.id))).set(body.eq(&new.body)).get_result(db)
+}
+
+pub fn delete(db: &mut PgConnection, kill: &i32) -> Result<DisplayPost, diesel::result::Error> {
+    use crate::schema::posts::dsl::*;
+    diesel::delete(posts.filter(id.eq(kill))).get_result(db)
 }

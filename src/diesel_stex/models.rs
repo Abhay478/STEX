@@ -31,7 +31,7 @@ pub struct AutocParamsInt {
 
 #[derive(Deserialize, Serialize, Queryable, Debug)]
 pub struct AutocParamsAll {
-    pub tag: String, //try and make it &str later
+    pub tag: String, //try and make it &str later // Can't, coz weird lifetime errors.
     pub uid: i32,
     pub title: String
 
