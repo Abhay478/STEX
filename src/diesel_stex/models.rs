@@ -54,7 +54,7 @@ pub struct DummyRes {
 #[derive(Insertable, Deserialize, Queryable, Serialize, Debug)]
 #[diesel(table_name = users)]
 pub struct User {
-    // #[diesel(sql_type = Text)]
+    pub id: i32,
     pub display_name: String,
 }
 

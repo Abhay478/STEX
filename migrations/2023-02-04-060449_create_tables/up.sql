@@ -1,15 +1,16 @@
--- Example of schema 
--- The schema does not include any indexes ( except PK's )
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Users
 CREATE TABLE users (
-	id SERIAL PRIMARY KEY,
+	id serial PRIMARY KEY,
 	account_id INTEGER,
-	reputation INTEGER NOT NULL,
+	reputation INTEGER NOT NULL default 0,
+	-- email VARCHAR(255) NOT NULL UNIQUE,
+    -- password VARCHAR(100) NOT NULL,
 	views INTEGER DEFAULT 0,
 	down_votes INTEGER DEFAULT 0,
 	up_votes INTEGER DEFAULT 0,
-	display_name VARCHAR(255) NOT NULL,
+	display_name VARCHAR(255) NOT NULL default 'Anonymous',
 	location VARCHAR(512),
 	profile_image_url VARCHAR(255),
 	website_url VARCHAR(255),

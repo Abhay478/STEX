@@ -1,9 +1,10 @@
 #![allow(non_snake_case)]
 #![recursion_limit = "256"]
-use actix_web::{HttpServer, App, web::Data};
+use actix_web::{HttpServer, App, web::Data, middleware::Logger};
 
 pub mod diesel_stex;
 pub mod actix_stex;
+pub mod auth_stex;
 pub mod schema;
 use actix_stex::handlers::*;
 use diesel::{PgConnection, r2d2::ConnectionManager};
@@ -14,6 +15,7 @@ async fn main() -> std::io::Result<()> {
     let pool = diesel_stex::connect();
     HttpServer::new(move || {
         App::new().app_data(Data::new(pool.clone()))
+            .wrap(Logger::default())
             .service(hello)
             .service(echo)
             .service(hey)

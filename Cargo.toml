@@ -10,7 +10,7 @@ actix-web = "4.3.0"
 actix-web-httpauth = "0.8.0"
 chrono = { version = "0.4.23", features = ["serde"] }
 derive_more = "0.99.17"
-diesel = { version = "2.0.3", features = ["postgres", "r2d2", "chrono"] }
+diesel = { version = "2.0.3", features = ["postgres", "r2d2", "chrono", "uuid"] }
 dotenvy = "0.15.6"
 futures = "0.3.26"
 r2d2 = "0.8.10"
@@ -24,3 +24,7 @@ actix-rt = "2.8.0"
 text_io = "0.1.12"
 oauth2 = "4.3.0"
 anyhow = "1.0.69"
+uuid = { version = "1.2.2", features = ["serde", "v4"] }
+actix-cors = "0.6.4"
+argon2 = "0.4.1"
+jsonwebtoken = "8.2.0"

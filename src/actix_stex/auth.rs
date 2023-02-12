@@ -142,3 +142,73 @@ let token_result = client
     .await?;
 
 */
+use anyhow;
+use oauth2::*;
+use oauth2::basic::{BasicClient, BasicTokenType};
+use oauth2::reqwest::async_http_client;
+use oauth2::url::*;
+use actix_web::get;
+use serde_derive::{Serialize, Deserialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Web {
+    client_id: String, // ": "906591928750-3gksa42oad11qt7hlokthhanmb68fknl.apps.googleusercontent.com",
+    project_id: String, //"forward-logic-377503",
+    auth_uri: String, // "https://accounts.google.com/o/oauth2/auth",
+    token_uri: String, // "https://oauth2.googleapis.com/token",
+    auth_provider_x509_cert_url: String, //"https://www.googleapis.com/oauth2/v1/certs",
+    client_secret: String, //"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",
+    redirect_uris: [String; 1], //["https://cqa-auth.com"],
+    javascript_origins: [String; 1]//["https://cqa-auth.com"]
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Secrets {
+    web: Web
+}
+pub async fn authit() -> Result<StandardTokenResponse<EmptyExtraTokenFields, BasicTokenType>, anyhow::Error>{
+    // Create an OAuth2 client by specifying the client ID, client secret, authorization URL and
+    // token URL.
+
+    let file = serde_json::from_str::<Secrets>(&*std::fs::read_to_string("secret.json").unwrap()).unwrap().web;
+    let client =
+        BasicClient::new(
+            ClientId::new(file.client_id),
+            Some(ClientSecret::new(file.client_secret)),
+            AuthUrl::new(file.auth_uri)?,
+            Some(TokenUrl::new(file.token_uri)?)
+        )
+        // Set the URL the user will be redirected to after the authorization process.
+        .set_redirect_uri(RedirectUrl::new(file.redirect_uris[0].clone())?);
+
+    // Generate a PKCE challenge.
+    let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
+
+    // Generate the full authorization URL.
+    let (auth_url, csrf_token) = client
+        .authorize_url(CsrfToken::new_random)
+        // Set the desired scopes.
+        .add_scope(Scope::new("read".to_string()))
+        .add_scope(Scope::new("write".to_string()))
+        // Set the PKCE code challenge.
+        .set_pkce_challenge(pkce_challenge)
+        .url();
+
+    // This is the URL you should redirect the user to, in order to trigger the authorization
+    // process.
+    // println!("Browse to: {}", auth_url);
+
+    // Once the user has been redirected to the redirect URL, you'll have access to the
+    // authorization code. For security reasons, your code should verify that the `state`
+    // parameter returned by the server matches `csrf_state`.
+
+    // Now you can trade it for an access token.
+    let token_result = client
+        .exchange_code(AuthorizationCode::new("some authorization code".to_string()))
+        // Set the PKCE code verifier.
+        .set_pkce_verifier(pkce_verifier)
+        .request_async(async_http_client)
+        .await?;
+
+    Ok(token_result)
+}

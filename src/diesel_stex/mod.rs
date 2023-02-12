@@ -60,6 +60,7 @@ use crate::diesel_stex::models::AnswerPost;
 // use self::models::DummyRes;
 use self::models::DisplayPost;
 use self::models::NewPost;
+use self::models::User;
 // use self::models::NewPost;
 // use self::models::Post;
 
@@ -100,9 +101,9 @@ pub fn connect() -> Pool {
 //     diesel::insert_into(crate::schema::dummys::table).values(&req).get_result(db).unwrap()
 // }
 
-pub fn get_all_dnames(db: &mut PgConnection, prefix: &str) -> Vec<AutocResults> {
+pub fn get_all_dnames(db: &mut PgConnection, prefix: &str) -> Vec<User> {
     use crate::schema::users::{display_name, dsl, id};
-    dsl::users.select((id, display_name)).filter(display_name.like(format!("%{prefix}%"))).load::<AutocResults>(db).unwrap()
+    dsl::users.select((id, display_name)).filter(display_name.like(format!("%{prefix}%"))).load::<User>(db).unwrap()
 }
 
 pub fn get_all_pnames(db: &mut PgConnection, prefix: &str) -> Vec<AutocResults> {
@@ -150,10 +151,9 @@ pub fn answer(db: &mut PgConnection, new: &AnswerPost) -> Result<DisplayPost, di
     diesel::insert_into(posts).values(new).get_result(db)
 }
 
-// et cetera. Design choice later.
 pub fn update(db: &mut PgConnection, new: &NewPost) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
-    diesel::update(posts.filter(id.eq(new.id))).set(body.eq(&new.body)).get_result(db)
+    diesel::update(posts.filter(id.eq(new.id))).set(tags.eq(&new.tags)).get_result(db)
 }
 
 pub fn delete(db: &mut PgConnection, kill: &i32) -> Result<DisplayPost, diesel::result::Error> {
