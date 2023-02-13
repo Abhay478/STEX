@@ -1,21 +1,43 @@
 #![allow(non_snake_case)]
 #![recursion_limit = "256"]
-use actix_web::{HttpServer, App, web::Data, middleware::Logger};
-
+use actix_web::{HttpServer, App, web::Data, middleware::Logger, http::header};
+use actix_cors::Cors;
 pub mod diesel_stex;
 pub mod actix_stex;
 pub mod auth_stex;
 pub mod schema;
 use actix_stex::handlers::*;
+use auth_stex::models::AppState;
 use diesel::{PgConnection, r2d2::ConnectionManager};
 
 type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
+
+fn before() {
+    if std::env::var_os("RUST_LOG").is_none() {
+        std::env::set_var("RUST_LOG", "actix_web=info");
+    }
+}
+
+fn corses() -> Cors {
+    Cors::default()
+        // .allowed_origin("http://localhost:3000")
+        .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
+        .allowed_headers(vec![
+            header::CONTENT_TYPE,
+            header::AUTHORIZATION,
+            header::ACCEPT,
+        ])
+        .supports_credentials()
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let pool = diesel_stex::connect();
+    // let pool = diesel_stex::connect();
+    before();
     HttpServer::new(move || {
-        App::new().app_data(Data::new(pool.clone()))
+        App::new().app_data(Data::new(AppState::init()))
             .wrap(Logger::default())
+            .configure(actix_stex::auth::config)
             .service(hello)
             .service(echo)
             .service(hey)
@@ -29,6 +51,8 @@ async fn main() -> std::io::Result<()> {
             .service(answer_to_post)
             .service(delete_post)
             .service(update_post)
+            .wrap(corses())
+            .wrap(Logger::default())
     })
     .bind(("localhost", 8080))?
     .run()

@@ -5,8 +5,6 @@ CREATE TABLE users (
 	id serial PRIMARY KEY,
 	account_id INTEGER,
 	reputation INTEGER NOT NULL default 0,
-	-- email VARCHAR(255) NOT NULL UNIQUE,
-    -- password VARCHAR(100) NOT NULL,
 	views INTEGER DEFAULT 0,
 	down_votes INTEGER DEFAULT 0,
 	up_votes INTEGER DEFAULT 0,
@@ -114,3 +112,4 @@ create table dummys (
 	a integer,
 	b integer
 )
+

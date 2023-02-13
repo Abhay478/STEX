@@ -1,6 +1,14 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    accounts (id) {
+        id -> Int4,
+        username -> Nullable<Varchar>,
+        password_hash -> Nullable<Varchar>,
+    }
+}
+
+diesel::table! {
     badges (id) {
         id -> Int4,
         user_id -> Int4,
@@ -124,6 +132,7 @@ diesel::table! {
 }
 
 diesel::allow_tables_to_appear_in_same_query!(
+    accounts,
     badges,
     comments,
     dummys,
