@@ -71,6 +71,7 @@ pub fn connect() -> Pool {
     let url = env::var("DATABASE_URL").unwrap();
     // PgConnection::establish(&url).unwrap_or_else(|_| panic!("Oops."))
     let cn = ConnectionManager::<PgConnection>::new(url);
+    println!("Connected to database.");
     r2d2::Pool::builder().build(cn).unwrap()
 }
 

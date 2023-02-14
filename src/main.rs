@@ -7,14 +7,15 @@ pub mod actix_stex;
 pub mod auth_stex;
 pub mod schema;
 use actix_stex::handlers::*;
-use auth_stex::models::AppState;
+use actix_stex::auth::*;
+use auth_stex::models::{AppState, Config};
 use diesel::{PgConnection, r2d2::ConnectionManager};
 
 type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 fn before() {
     if std::env::var_os("RUST_LOG").is_none() {
-        std::env::set_var("RUST_LOG", "actix_web=info");
+        std::env::set_var("RUST_LOG", "debug");
     }
 }
 
@@ -32,12 +33,11 @@ fn corses() -> Cors {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // let pool = diesel_stex::connect();
+    let pool = diesel_stex::connect();
     before();
     HttpServer::new(move || {
-        App::new().app_data(Data::new(AppState::init()))
+        App::new().app_data(Data::new(AppState{pool: pool.clone(), env: Config::init()}))
             .wrap(Logger::default())
-            .configure(actix_stex::auth::config)
             .service(hello)
             .service(echo)
             .service(hey)
@@ -51,8 +51,10 @@ async fn main() -> std::io::Result<()> {
             .service(answer_to_post)
             .service(delete_post)
             .service(update_post)
-            .wrap(corses())
-            .wrap(Logger::default())
+            .service(register_user_handler)
+            .service(login_user_handler)
+            .service(logout_handler)
+            // .wrap(corses())
     })
     .bind(("localhost", 8080))?
     .run()

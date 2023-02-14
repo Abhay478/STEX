@@ -30,7 +30,7 @@ impl fmt::Display for ErrorResponse {
 }
 
 pub struct JwtMiddleware {
-    pub user_id: uuid::Uuid,
+    pub user_id: String,
 }
 
 impl FromRequest for JwtMiddleware {
@@ -71,10 +71,11 @@ impl FromRequest for JwtMiddleware {
             }
         };
 
-        let user_id = uuid::Uuid::parse_str(claims.sub.as_str()).unwrap();
+        // let user_id = uuid::Uuid::parse_str(claims.sub.as_str()).unwrap();
+        let user_id = claims.sub.as_str();
         req.extensions_mut()
-            .insert::<uuid::Uuid>(user_id.to_owned());
+            .insert::<String>((user_id.to_owned()));
 
-        ready(Ok(JwtMiddleware { user_id }))
+        ready(Ok(JwtMiddleware { user_id: user_id.to_string() }))
     }
 }

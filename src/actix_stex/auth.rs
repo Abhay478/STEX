@@ -251,7 +251,7 @@ async fn register_user_handler(body: web::Json<Account>, data: web::Data<AppStat
     let exists = !accounts.filter(username.eq(body.username.as_ref())).get_results::<AccountID>(db).unwrap().is_empty();
     if exists {
         return HttpResponse::Conflict().json(
-            serde_json::json!({"status": "fail","message": "User with that email already exists"}),
+            serde_json::json!({"status": "fail","message": "User with that username already exists"}),
         );
     }
 
@@ -261,19 +261,19 @@ async fn register_user_handler(body: web::Json<Account>, data: web::Data<AppStat
         .expect("Error while hashing password")
         .to_string();
 
-    let res = diesel::insert_into(accounts).values(body.clone()).get_results::<AccountID>(db);
+    let res = diesel::insert_into(accounts).values((username.eq(&body.username), password_hash.eq(hashed_password))).get_result::<AccountID>(db);
     match res {
         Ok(user) => {
             // let user_response = serde_json::json!({"status": "success","data": serde_json::json!({
             //     "user": filter_user_record(&user)
             // })});
 
-            return HttpResponse::Ok().body("TODO");
+            return HttpResponse::Ok().json(user);
         }
         Err(e) => {
-            // return HttpResponse::InternalServerError()
-            //     .json(serde_json::json!({"status": "error","message": format!("{:?}", e)}));
-            return HttpResponse::InternalServerError().body("TODO");
+            return HttpResponse::InternalServerError()
+                .json(serde_json::json!({"status": "error","message": format!("{:?}", e)}));
+            // return HttpResponse::InternalServerError().json("TODO");
         }
     }
 }
@@ -311,15 +311,17 @@ async fn login_user_handler(body: web::Json<AccountID>, data: web::Data<AppState
             let othertemp = body.clone().password_hash.unwrap();
             let temp = user.clone().password_hash.unwrap();
             let parsed_hash = PasswordHash::new(temp.as_str()).unwrap();
-            let is_valid = Argon2::default()
+            let mut is_valid = Argon2::default()
                 .verify_password(othertemp.as_bytes(), &parsed_hash)
                 .map_or(false, |_| true);
+
+            is_valid = is_valid && user.username == body.username;
             if !is_valid {
                 return HttpResponse::BadRequest()
-                    .json(json!({"status": "fail", "message": "Invalid email or password"}));
+                    .json(json!({"status": "fail", "message": "Invalid username or password"}));
             }
         }
-        Err(e) => {return HttpResponse::BadRequest().json(json!({"status": "fail", "message": "Invalid email or password"}));}
+        Err(e) => {return HttpResponse::BadRequest().json(json!({"status": "fail", "message": "No record."}));}
     }
 
     let user = query_result.unwrap();
@@ -400,12 +402,12 @@ async fn get_me_handler(req: HttpRequest, data: web::Data<AppState>, _: jwt_auth
 //     }
 // }
 
-pub fn config(conf: &mut web::ServiceConfig) {
-    let scope = web::scope("/")
-        .service(health_checker_handler)
-        .service(register_user_handler)
-        .service(login_user_handler)
-        .service(logout_handler);
+// pub fn config(conf: &mut web::ServiceConfig) {
+//     let scope = web::scope("/")
+//         .service(health_checker_handler)
+//         .service(register_user_handler)
+//         .service(login_user_handler)
+//         .service(logout_handler);
 
-    conf.service(scope);
-}
+//     conf.service(scope);
+// }
