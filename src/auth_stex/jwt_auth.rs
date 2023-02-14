@@ -74,7 +74,7 @@ impl FromRequest for JwtMiddleware {
         // let user_id = uuid::Uuid::parse_str(claims.sub.as_str()).unwrap();
         let user_id = claims.sub.as_str();
         req.extensions_mut()
-            .insert::<String>((user_id.to_owned()));
+            .insert::<String>(user_id.to_owned());
 
         ready(Ok(JwtMiddleware { user_id: user_id.to_string() }))
     }

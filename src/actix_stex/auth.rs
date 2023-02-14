@@ -225,7 +225,7 @@
 use crate::{auth_stex::jwt_auth::{self, TokenClaims}, AppState, actix_stex::models::{Account, AccountID}};
 use actix_web::{
     cookie::{time::Duration as ActixWebDuration, Cookie},
-    get, post, web, HttpMessage, HttpRequest, HttpResponse, Responder,
+    get, post, web, HttpResponse, Responder,
 };
 use argon2::{
     password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
@@ -310,7 +310,7 @@ async fn login_user_handler(body: web::Json<AccountID>, data: web::Data<AppState
                     .json(json!({"status": "fail", "message": "Invalid username or password"}));
             }
         }
-        Err(e) => {return HttpResponse::BadRequest().json(json!({"status": "fail", "message": "No record."}));}
+        Err(_e) => {return HttpResponse::BadRequest().json(json!({"status": "fail", "message": "No record."}));}
     }
 
     let user = query_result.unwrap();

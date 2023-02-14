@@ -2,7 +2,7 @@
 
 use actix_web::{get, post, web::{self}, HttpResponse, Responder, delete};
 
-use crate::{Pool, diesel_stex::models::*, auth_stex::{models::AppState, jwt_auth::JwtMiddleware}};
+use crate::{diesel_stex::models::*, auth_stex::{models::AppState, jwt_auth::JwtMiddleware}};
 
 #[get("/")]
 pub async fn hello() -> impl Responder {

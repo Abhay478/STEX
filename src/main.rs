@@ -21,7 +21,7 @@ fn before() {
 
 fn corses() -> Cors {
     Cors::default()
-        // .allowed_origin("http://localhost:3000")
+        .allowed_origin("http://localhost:3000")
         .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
         .allowed_headers(vec![
             header::CONTENT_TYPE,
@@ -55,7 +55,7 @@ async fn main() -> std::io::Result<()> {
             .service(login_user_handler)
             .service(logout_handler)
             .service(get_answers)
-            // .wrap(corses())
+            .wrap(corses())
     })
     .bind(("localhost", 8080))?
     .run()
