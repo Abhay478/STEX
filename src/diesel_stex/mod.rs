@@ -161,3 +161,8 @@ pub fn delete(db: &mut PgConnection, kill: &i32) -> Result<DisplayPost, diesel::
     use crate::schema::posts::dsl::*;
     diesel::delete(posts.filter(id.eq(kill))).get_result(db)
 }
+
+pub fn all_answers(db: &mut PgConnection, parent: &i32) -> Result<Vec<DisplayPost>, diesel::result::Error> {
+    use crate::schema::posts::dsl::*;
+    posts.filter(parent_id.eq(parent)).get_results::<DisplayPost>(db)
+}

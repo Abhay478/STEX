@@ -100,3 +100,13 @@ pub async fn delete_post(state: web::Data<AppState>, kill: web::Query<AutocParam
         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string()))
     }
 }
+
+#[get("/post/answer")]
+pub async fn get_answers(state: web::Data<AppState>, this: web::Query<AutocParamsInt>, _ : JwtMiddleware) -> impl Responder {
+    let db = &state.pool;
+    let answers = crate::diesel_stex::all_answers(&mut db.get().unwrap(), &(this.q as i32));
+    match answers {
+        Ok(p) => HttpResponse::Ok().json(p),
+        Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string()))
+    }
+}
