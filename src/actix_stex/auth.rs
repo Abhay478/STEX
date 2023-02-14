@@ -294,18 +294,7 @@ async fn login_user_handler(body: web::Json<AccountID>, data: web::Data<AppState
     let db = &mut data.pool.get().unwrap();
 
     let query_result = accounts.filter(id.eq(body.id)).get_result::<AccountID>(db);
-    // let user = query_result.map_or(None, |u| Some(u));
-    // let is_valid = query_result.map_or(false, |user| {
-    //     let temp = user.password_hash.unwrap();
-    //     let othertemp = body.clone().password_hash.unwrap();
-    //     let parsed_hash = PasswordHash::new(temp.as_str()).unwrap();
-    //     Argon2::default()
-    //         .verify_password(othertemp.as_bytes(), &parsed_hash)
-    //         .map_or(false, |_| true)
-    // });
-
     
-
     match &query_result {
         Ok(user) => {
             let othertemp = body.clone().password_hash.unwrap();
