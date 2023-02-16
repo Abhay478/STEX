@@ -62,9 +62,9 @@ pub async fn get_post_by_tag(state: web::Data<AppState>, tag: web::Query<AutocPa
 }
 
 #[post("/post/new")]
-pub async fn insert_post(state: web::Data<AppState>, new: web::Json<NewPost>, _ : JwtMiddleware) -> impl Responder {
+pub async fn insert_post(state: web::Data<AppState>, mut new: web::Json<NewPost>, _ : JwtMiddleware) -> impl Responder {
     let db = &state.pool;
-    let post = crate::diesel_stex::new_post(&mut db.get().unwrap(), &new.0);
+    let post = crate::diesel_stex::new_post(&mut db.get().unwrap(), &mut new.0);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::Ok().json(format!("Can't do that: {}.", e.to_string()))
@@ -82,7 +82,7 @@ pub async fn answer_to_post(state: web::Data<AppState>, new: web::Json<AnswerPos
 }
 
 #[post("/post/update")]
-pub async fn update_post(state: web::Data<AppState>, new: web::Json<NewPost>, _ : JwtMiddleware) -> impl Responder {
+pub async fn update_post(state: web::Data<AppState>, new: web::Json<OldPost>, _ : JwtMiddleware) -> impl Responder {
     let db = &state.pool;
     let post = crate::diesel_stex::update(&mut db.get().unwrap(), &new.0);
     match post {
@@ -101,12 +101,28 @@ pub async fn delete_post(state: web::Data<AppState>, kill: web::Query<AutocParam
     }
 }
 
-#[get("/post/answer")]
-pub async fn get_answers(state: web::Data<AppState>, this: web::Query<AutocParamsInt>, _ : JwtMiddleware) -> impl Responder {
+/// Route responds to a get request with struct containing the post corresponding to that id, and all answers to that post.
+#[get("/question/{id}")]
+pub async fn get_question(state: web::Data<AppState>, id: web::Path<i32>) -> impl Responder {
+    use crate::actix_stex::models::Page;
     let db = &state.pool;
-    let answers = crate::diesel_stex::all_answers(&mut db.get().unwrap(), &(this.q as i32));
-    match answers {
-        Ok(p) => HttpResponse::Ok().json(p),
+    let qn = crate::diesel_stex::get_post_by_id(&mut db.get().unwrap(), &id);
+    match qn {
+        Ok(q) => {
+            let out = Page {q, a: crate::diesel_stex::all_answers(&mut db.get().unwrap(), &id).unwrap()};
+            HttpResponse::Ok().json(out)
+        }, 
         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string()))
     }
 }
+
+// /// Go to place, get answers to question
+// #[get("/question/{id}/answers")]
+// pub async fn get_answers(state: web::Data<AppState>, id: web::Path<i32>) -> impl Responder {
+//     let db = &state.pool;
+//     let answers = crate::diesel_stex::all_answers(&mut db.get().unwrap(), &id);
+//     match answers {
+//         Ok(p) => HttpResponse::Ok().json(p),
+//         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string()))
+//     }
+// }

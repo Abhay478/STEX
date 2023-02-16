@@ -2,15 +2,6 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use serde_derive::{Deserialize, Serialize};
 use crate::schema::*;
-// use diesel::deserialize::{self, FromSql};
-
-// #[derive(Queryable, Debug)]
-// pub struct Post {
-//     pub id: i32,
-//     pub title: String,
-//     pub body: String,
-//     pub published: bool,
-// }
 
 #[derive(Insertable, Deserialize)]
 #[diesel(table_name = dummys)]
@@ -101,30 +92,30 @@ pub struct DisplayPost {
 #[derive(Insertable, Serialize, Deserialize)]
 #[diesel(table_name = posts)]
 pub struct NewPost {
-    pub id: i32,
-    pub owner_user_id: Option<i32>,
-    pub post_type_id: i16,
-    pub title: Option<String>,
-    pub tags: Option<String>,
-    pub body: Option<String>,
-    pub score: i32,
-    pub content_license: String,
+    pub owner_user_id: i32,
+    pub title: String,
+    pub tags: String,
+    pub body: String,
     pub creation_date: NaiveDateTime,
 }
 
 #[derive(Insertable, Serialize, Deserialize)]
 #[diesel(table_name = posts)]
-pub struct AnswerPost {
+pub struct OldPost {
     pub id: i32,
-    pub owner_user_id: Option<i32>,
-    pub post_type_id: i16,
-    pub title: Option<String>,
-    pub tags: Option<String>,
-    pub body: Option<String>,
-    pub score: i32,
-    pub parent_id: Option<i32>,
-    pub content_license: String,
-    pub creation_date: NaiveDateTime,
+    pub title: String,
+    pub tags: String,
+    pub body: String,
+}
+
+#[derive(Insertable, Serialize, Deserialize)]
+#[diesel(table_name = posts)]
+pub struct AnswerPost {
+    pub owner_user_id: i32,
+    pub title: String,
+    pub tags: String,
+    pub body: String,
+    pub parent_id: i32, // the important one
 }
 
 

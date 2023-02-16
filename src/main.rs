@@ -54,7 +54,7 @@ async fn main() -> std::io::Result<()> {
             .service(register_user_handler)
             .service(login_user_handler)
             .service(logout_handler)
-            .service(get_answers)
+            .service(get_question)
             .wrap(corses())
     })
     .bind(("localhost", 8080))?

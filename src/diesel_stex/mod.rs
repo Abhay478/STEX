@@ -58,9 +58,7 @@ use crate::diesel_stex::models::AnswerPost;
 // use self::models::AutocParamsAll;
 // use self::models::Dummy;
 // use self::models::DummyRes;
-use self::models::DisplayPost;
-use self::models::NewPost;
-use self::models::User;
+use self::models::*;
 // use self::models::NewPost;
 // use self::models::Post;
 
@@ -142,9 +140,10 @@ pub fn post_search_many_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPos
 //     posts.filter(tags.like(format!("%{}%", req.tag))).filter(owner_user_id.eq(req.uid)).filter(title.like(format!("%{}%", req.title))).get_results::<DisplayPost>(db).unwrap()
 // }
 
-pub fn new_post(db: &mut PgConnection, new: &NewPost) -> Result<DisplayPost, diesel::result::Error> {
+pub fn new_post(db: &mut PgConnection, new: &mut NewPost) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::posts;
-    diesel::insert_into(posts).values(new).get_result(db)
+    new.creation_date = chrono::offset::Local::now().naive_utc();
+    diesel::insert_into(posts).values(&*new).get_result(db)
 }
 
 pub fn answer(db: &mut PgConnection, new: &AnswerPost) -> Result<DisplayPost, diesel::result::Error> {
@@ -152,9 +151,9 @@ pub fn answer(db: &mut PgConnection, new: &AnswerPost) -> Result<DisplayPost, di
     diesel::insert_into(posts).values(new).get_result(db)
 }
 
-pub fn update(db: &mut PgConnection, new: &NewPost) -> Result<DisplayPost, diesel::result::Error> {
+pub fn update(db: &mut PgConnection, new: &OldPost) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
-    diesel::update(posts.filter(id.eq(new.id))).set(tags.eq(&new.tags)).get_result(db)
+    diesel::update(posts.filter(id.eq(new.id))).set((tags.eq(&new.tags), body.eq(&new.body), title.eq(&new.title))).get_result(db)
 }
 
 pub fn delete(db: &mut PgConnection, kill: &i32) -> Result<DisplayPost, diesel::result::Error> {
@@ -165,4 +164,9 @@ pub fn delete(db: &mut PgConnection, kill: &i32) -> Result<DisplayPost, diesel::
 pub fn all_answers(db: &mut PgConnection, parent: &i32) -> Result<Vec<DisplayPost>, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
     posts.filter(parent_id.eq(parent)).get_results::<DisplayPost>(db)
+}
+
+pub fn get_post_by_id(db: &mut PgConnection, idd: &i32) -> Result<DisplayPost, diesel::result::Error> {
+    use crate::schema::posts::dsl::*;
+    posts.filter(id.eq(idd)).get_result::<DisplayPost>(db)
 }

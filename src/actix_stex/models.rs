@@ -1,5 +1,5 @@
 use diesel::prelude::*;
-use crate::schema::*;
+use crate::{schema::*, diesel_stex::models::DisplayPost};
 use serde_derive::{Serialize, Deserialize};
 
 
@@ -23,3 +23,9 @@ pub struct AccountID {
 // pub struct User {
 
 // }
+
+#[derive(Deserialize, Serialize)]
+pub struct Page {
+    pub q: DisplayPost,
+    pub a: Vec<DisplayPost>
+}
