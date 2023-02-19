@@ -18,12 +18,6 @@ pub struct AccountID {
     pub password_hash: Option<String>,
 }
 
-// #[derive(Debug, Deserialize, Serialize, Queryable, Insertable)]
-// #[diesel(table_name = users)]
-// pub struct User {
-
-// }
-
 #[derive(Deserialize, Serialize)]
 pub struct Page {
     pub q: DisplayPost,

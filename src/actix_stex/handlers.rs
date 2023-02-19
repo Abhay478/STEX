@@ -6,7 +6,7 @@ use actix_web::{
 
 use crate::{
     auth_stex::{jwt_auth::JwtMiddleware, models::AppState},
-    diesel_stex::models::*,
+    diesel_stex::{handlers::*, models::*},
 };
 
 #[get("/")]
@@ -31,7 +31,7 @@ pub async fn get_names(
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let all = crate::diesel_stex::get_all_dnames(&mut db.get().unwrap(), &prefix.q);
+    let all = get_all_dnames(&mut db.get().unwrap(), &prefix.q);
     HttpResponse::Ok().json(all)
 }
 
@@ -42,7 +42,7 @@ pub async fn get_tags(
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let all = crate::diesel_stex::get_all_tagnames(&mut db.get().unwrap(), &prefix.q);
+    let all = get_all_tagnames(&mut db.get().unwrap(), &prefix.q);
     HttpResponse::Ok().json(all)
 }
 
@@ -53,7 +53,7 @@ pub async fn get_posts(
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let all = crate::diesel_stex::get_all_pnames(&mut db.get().unwrap(), &prefix.q);
+    let all = get_all_pnames(&mut db.get().unwrap(), &prefix.q);
     HttpResponse::Ok().json(all)
 }
 
@@ -64,7 +64,7 @@ pub async fn get_post_by_title(
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = crate::diesel_stex::post_search_title(&mut db.get().unwrap(), &title.q);
+    let post = post_search_title(&mut db.get().unwrap(), &title.q);
     HttpResponse::Ok().json(post)
 }
 
@@ -75,8 +75,7 @@ pub async fn get_post_by_owner(
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post =
-        crate::diesel_stex::post_search_owner(&mut db.get().unwrap(), oid.q.parse().unwrap_or(-1));
+    let post = post_search_owner(&mut db.get().unwrap(), oid.q.parse().unwrap_or(-1));
     HttpResponse::Ok().json(post)
 }
 
@@ -87,7 +86,7 @@ pub async fn get_post_by_tag(
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = crate::diesel_stex::post_search_tags(&mut db.get().unwrap(), &tag.q);
+    let post = post_search_tags(&mut db.get().unwrap(), &tag.q);
     HttpResponse::Ok().json(post)
 }
 
@@ -98,7 +97,7 @@ pub async fn insert_post(
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = crate::diesel_stex::new_post(&mut db.get().unwrap(), &mut new.0);
+    let post = new_post(&mut db.get().unwrap(), &mut new.0);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::Ok().json(format!("Can't do that: {}.", e.to_string())),
@@ -112,7 +111,7 @@ pub async fn answer_to_post(
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = crate::diesel_stex::answer(&mut db.get().unwrap(), &new.0);
+    let post = answer(&mut db.get().unwrap(), &new.0);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::Ok().json(format!("Can't do that: {}.", e.to_string())),
@@ -126,7 +125,7 @@ pub async fn update_post(
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = crate::diesel_stex::update(&mut db.get().unwrap(), &new.0);
+    let post = update(&mut db.get().unwrap(), &new.0);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),
@@ -140,7 +139,7 @@ pub async fn delete_post(
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = crate::diesel_stex::delete(&mut db.get().unwrap(), &(kill.q as i32));
+    let post = delete(&mut db.get().unwrap(), &(kill.q as i32));
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),
@@ -152,12 +151,12 @@ pub async fn delete_post(
 pub async fn get_question(state: web::Data<AppState>, id: web::Path<i32>) -> impl Responder {
     use crate::actix_stex::models::Page;
     let db = &state.pool;
-    let qn = crate::diesel_stex::get_post_by_id(&mut db.get().unwrap(), &id);
+    let qn = get_post_by_id(&mut db.get().unwrap(), &id);
     match qn {
         Ok(q) => {
             let out = Page {
                 q,
-                a: crate::diesel_stex::all_answers(&mut db.get().unwrap(), &id).unwrap(),
+                a: all_answers(&mut db.get().unwrap(), &id).unwrap(),
             };
             HttpResponse::Ok().json(out)
         }
@@ -169,7 +168,7 @@ pub async fn get_question(state: web::Data<AppState>, id: web::Path<i32>) -> imp
 // #[get("/question/{id}/answers")]
 // pub async fn get_answers(state: web::Data<AppState>, id: web::Path<i32>) -> impl Responder {
 //     let db = &state.pool;
-//     let answers = crate::diesel_stex::all_answers(&mut db.get().unwrap(), &id);
+//     let answers = all_answers(&mut db.get().unwrap(), &id);
 //     match answers {
 //         Ok(p) => HttpResponse::Ok().json(p),
 //         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string()))
@@ -179,10 +178,10 @@ pub async fn get_question(state: web::Data<AppState>, id: web::Path<i32>) -> imp
 #[get("/{id}")]
 pub async fn whoami(state: web::Data<AppState>, id: web::Path<i32>) -> impl Responder {
     let db = &state.pool;
-    let me = crate::diesel_stex::iam(&mut db.get().unwrap(), &id);
+    let me = iam(&mut db.get().unwrap(), &id);
     match me {
         Ok(q) => {
-            // let out = Page {q, a: crate::diesel_stex::all_answers(&mut db.get().unwrap(), &id).unwrap()};
+            // let out = Page {q, a: all_answers(&mut db.get().unwrap(), &id).unwrap()};
             HttpResponse::Ok().json(q)
         }
         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),

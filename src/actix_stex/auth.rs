@@ -1,7 +1,7 @@
 use crate::{
     actix_stex::models::{Account, AccountID},
     auth_stex::jwt_auth::{self, TokenClaims},
-    diesel_stex::{acc_by_id, dupe_acc, makeme},
+    diesel_stex::handlers::{acc_by_id, dupe_acc, makeme},
     AppState,
 };
 use actix_web::{
@@ -33,9 +33,8 @@ pub async fn register_user_handler(
     let db = &mut data.pool.get().unwrap();
     let exists = dupe_acc(db, &body.username);
     if exists {
-        return HttpResponse::Conflict().json(
-            serde_json::json!({"status": "fail","message": "Doppleganger alert."}),
-        );
+        return HttpResponse::Conflict()
+            .json(serde_json::json!({"status": "fail","message": "Doppleganger alert."}));
     }
 
     let res = makeme(
