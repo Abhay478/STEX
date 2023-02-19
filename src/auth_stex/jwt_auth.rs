@@ -5,7 +5,7 @@ use actix_web::error::ErrorUnauthorized;
 use actix_web::{dev::Payload, Error as ActixWebError};
 use actix_web::{http, web, FromRequest, HttpMessage, HttpRequest};
 use jsonwebtoken::{decode, DecodingKey, Validation};
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::{Deserialize, Serialize};
 
 // use crate::model::TokenClaims;
 use crate::AppState;
@@ -73,9 +73,10 @@ impl FromRequest for JwtMiddleware {
 
         // let user_id = uuid::Uuid::parse_str(claims.sub.as_str()).unwrap();
         let user_id = claims.sub.as_str();
-        req.extensions_mut()
-            .insert::<String>(user_id.to_owned());
+        req.extensions_mut().insert::<String>(user_id.to_owned());
 
-        ready(Ok(JwtMiddleware { user_id: user_id.to_string() }))
+        ready(Ok(JwtMiddleware {
+            user_id: user_id.to_string(),
+        }))
     }
 }

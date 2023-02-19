@@ -1,37 +1,36 @@
+use crate::schema::*;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use serde_derive::{Deserialize, Serialize};
-use crate::schema::*;
 
 #[derive(Insertable, Deserialize)]
 #[diesel(table_name = dummys)]
 pub struct Dummy {
     pub a: i32,
-    pub b: i32
+    pub b: i32,
 }
 
 #[derive(Deserialize, Serialize, Queryable, Debug)]
 pub struct AutocParams {
-    pub q: String
+    pub q: String,
 }
 
 #[derive(Deserialize, Serialize, Queryable, Debug)]
 pub struct AutocParamsInt {
-    pub q: usize
+    pub q: usize,
 }
 
 #[derive(Deserialize, Serialize, Queryable, Debug)]
 pub struct AutocParamsAll {
     pub tag: String, //try and make it &str later // Can't, coz weird lifetime errors.
     pub uid: i32,
-    pub title: String
-
+    pub title: String,
 }
 
 #[derive(Deserialize, Serialize, Queryable, Debug)]
 pub struct AutocResults {
     pub id: i32,
-    pub text: String
+    pub text: String,
 }
 
 #[derive(Queryable)]
@@ -70,7 +69,7 @@ pub struct DisplayPost {
     pub last_editor_user_id: Option<i32>,
     pub post_type_id: i16,
     pub accepted_answer_id: Option<i32>,
-    pub score: i32, 
+    pub score: i32,
     pub parent_id: Option<i32>,
     pub view_count: Option<i32>,
     pub answer_count: Option<i32>,
@@ -89,25 +88,23 @@ pub struct DisplayPost {
     pub last_activity_date: Option<NaiveDateTime>,
 }
 
-
 #[derive(Insertable, Deserialize, Queryable, Serialize, Debug)]
 #[diesel(table_name = users)]
 pub struct DisplayUser {
-    pub id: i32, // serial PRIMARY KEY,
-	pub account_id: Option<i32>, //INTEGER,
-	pub reputation: i32, // INTEGER NOT NULL default 0,
-	pub views: Option<i32>, // INTEGER DEFAULT 0,
-	pub down_votes: Option<i32>, //INTEGER DEFAULT 0,
-	pub up_votes: Option<i32>, //INTEGER DEFAULT 0,
-	pub display_name: String, // VARCHAR(255) NOT NULL default 'Anonymous',
-	pub location: Option<String>, //VARCHAR(512),
-	pub profile_image_url: Option<String>, //VARCHAR(255),
-	pub website_url: Option<String>, //VARCHAR(255),
-	pub about_me: Option<String>, //,
-	pub creation_date: NaiveDateTime, // TIMESTAMP NOT NULL,
-	pub last_access_date: NaiveDateTime, // TIMESTAMP NOT NULL
+    pub id: i32,                           // serial PRIMARY KEY,
+    pub account_id: Option<i32>,           //INTEGER,
+    pub reputation: i32,                   // INTEGER NOT NULL default 0,
+    pub views: Option<i32>,                // INTEGER DEFAULT 0,
+    pub down_votes: Option<i32>,           //INTEGER DEFAULT 0,
+    pub up_votes: Option<i32>,             //INTEGER DEFAULT 0,
+    pub display_name: String,              // VARCHAR(255) NOT NULL default 'Anonymous',
+    pub location: Option<String>,          //VARCHAR(512),
+    pub profile_image_url: Option<String>, //VARCHAR(255),
+    pub website_url: Option<String>,       //VARCHAR(255),
+    pub about_me: Option<String>,          //,
+    pub creation_date: NaiveDateTime,      // TIMESTAMP NOT NULL,
+    pub last_access_date: NaiveDateTime,   // TIMESTAMP NOT NULL
 }
-
 
 #[derive(Insertable, Serialize, Deserialize)]
 #[diesel(table_name = posts)]
@@ -137,8 +134,6 @@ pub struct AnswerPost {
     pub body: String,
     pub parent_id: i32, // the important one
 }
-
-
 
 // #[derive(Insertable)]
 // #[diesel(table_name = posts)]

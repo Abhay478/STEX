@@ -1,4 +1,3 @@
-
 pub struct Config {
     pub database_url: String,
     pub jwt_secret: String,
@@ -21,14 +20,16 @@ impl Config {
     }
 }
 
-
 pub struct AppState {
     pub pool: crate::Pool,
-    pub env: Config
+    pub env: Config,
 }
 
 impl AppState {
     pub fn init() -> Self {
-        AppState { pool: crate::diesel_stex::connect(), env: Config::init() }
+        AppState {
+            pool: crate::diesel_stex::connect(),
+            env: Config::init(),
+        }
     }
 }

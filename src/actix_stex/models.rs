@@ -1,8 +1,7 @@
+use crate::{diesel_stex::models::DisplayPost, schema::*};
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
-use crate::{schema::*, diesel_stex::models::DisplayPost};
-use serde_derive::{Serialize, Deserialize};
-
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Queryable, Insertable, Clone)]
 #[diesel(table_name = accounts)]
@@ -28,7 +27,7 @@ pub struct AccountID {
 #[derive(Deserialize, Serialize)]
 pub struct Page {
     pub q: DisplayPost,
-    pub a: Vec<DisplayPost>
+    pub a: Vec<DisplayPost>,
 }
 
 #[derive(Deserialize, Serialize)]
