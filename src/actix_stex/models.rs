@@ -1,3 +1,4 @@
+use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use crate::{schema::*, diesel_stex::models::DisplayPost};
 use serde_derive::{Serialize, Deserialize};
@@ -6,8 +7,8 @@ use serde_derive::{Serialize, Deserialize};
 #[derive(Debug, Deserialize, Serialize, Queryable, Insertable, Clone)]
 #[diesel(table_name = accounts)]
 pub struct Account {
-    pub username: Option<String>,
-    pub password_hash: Option<String>,
+    pub username: String,
+    pub password_hash: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, Queryable, Insertable, Clone)]
@@ -28,4 +29,11 @@ pub struct AccountID {
 pub struct Page {
     pub q: DisplayPost,
     pub a: Vec<DisplayPost>
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct NewUser {
+    pub display_name: String,
+    pub hash: String,
+    pub crnd: NaiveDateTime,
 }

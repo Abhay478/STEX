@@ -51,6 +51,8 @@ use dotenvy::dotenv;
 use std::env;
 
 use crate::Pool;
+use crate::actix_stex::models::AccountID;
+use crate::actix_stex::models::NewUser;
 use crate::diesel_stex::models::AutocResults;
 use crate::diesel_stex::models::AnswerPost;
 
@@ -169,4 +171,28 @@ pub fn all_answers(db: &mut PgConnection, parent: &i32) -> Result<Vec<DisplayPos
 pub fn get_post_by_id(db: &mut PgConnection, idd: &i32) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
     posts.filter(id.eq(idd)).get_result::<DisplayPost>(db)
+}
+
+pub fn iam(db: &mut PgConnection, idd: &i32) -> Result<DisplayUser, diesel::result::Error> {
+    use crate::schema::users::dsl::*;
+    users.filter(id.eq(idd)).get_result::<DisplayUser>(db)
+}
+
+pub fn makeme(db: &mut PgConnection, body: NewUser) -> Result<AccountID, diesel::result::Error> {
+    use argon2::{
+        password_hash::{rand_core::OsRng, PasswordHasher, SaltString},
+        Argon2,
+    };
+    use crate::schema::accounts::dsl::*;
+    use crate::schema::users::dsl::*;
+    let salt = SaltString::generate(&mut OsRng);
+    let hashed_password = Argon2::default()
+        .hash_password(body.hash.as_bytes(), &salt)
+        .expect("Error while hashing password")
+        .to_string();
+
+    let res1 = diesel::insert_into(users).values(display_name.eq(&body.display_name)).get_result::<DisplayUser>(db)?;
+    diesel::insert_into(accounts).values((crate::schema::accounts::dsl::id.eq(res1.id), username.eq(&body.display_name), password_hash.eq(hashed_password))).get_result::<AccountID>(db)
+        
+
 }

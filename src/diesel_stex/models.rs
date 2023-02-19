@@ -89,6 +89,26 @@ pub struct DisplayPost {
     pub last_activity_date: Option<NaiveDateTime>,
 }
 
+
+#[derive(Insertable, Deserialize, Queryable, Serialize, Debug)]
+#[diesel(table_name = users)]
+pub struct DisplayUser {
+    pub id: i32, // serial PRIMARY KEY,
+	pub account_id: Option<i32>, //INTEGER,
+	pub reputation: i32, // INTEGER NOT NULL default 0,
+	pub views: Option<i32>, // INTEGER DEFAULT 0,
+	pub down_votes: Option<i32>, //INTEGER DEFAULT 0,
+	pub up_votes: Option<i32>, //INTEGER DEFAULT 0,
+	pub display_name: String, // VARCHAR(255) NOT NULL default 'Anonymous',
+	pub location: Option<String>, //VARCHAR(512),
+	pub profile_image_url: Option<String>, //VARCHAR(255),
+	pub website_url: Option<String>, //VARCHAR(255),
+	pub about_me: Option<String>, //,
+	pub creation_date: NaiveDateTime, // TIMESTAMP NOT NULL,
+	pub last_access_date: NaiveDateTime, // TIMESTAMP NOT NULL
+}
+
+
 #[derive(Insertable, Serialize, Deserialize)]
 #[diesel(table_name = posts)]
 pub struct NewPost {

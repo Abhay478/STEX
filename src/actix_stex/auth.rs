@@ -222,13 +222,13 @@
 //     AppState,
 // };
 
-use crate::{auth_stex::jwt_auth::{self, TokenClaims}, AppState, actix_stex::models::{Account, AccountID}};
+use crate::{auth_stex::jwt_auth::{self, TokenClaims}, AppState, actix_stex::models::{Account, AccountID}, diesel_stex::makeme};
 use actix_web::{
     cookie::{time::Duration as ActixWebDuration, Cookie},
     get, post, web, HttpResponse, Responder,
 };
 use argon2::{
-    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
+    password_hash::{PasswordHash, PasswordVerifier},
     Argon2,
 };
 use chrono::{prelude::*, Duration};
@@ -247,21 +247,24 @@ async fn health_checker_handler() -> impl Responder {
 #[post("/auth/register")]
 async fn register_user_handler(body: web::Json<Account>, data: web::Data<AppState>,) -> impl Responder {
     use crate::schema::accounts::dsl::*;
+    use crate::actix_stex::models::NewUser;
     let db = &mut data.pool.get().unwrap();
-    let exists = !accounts.filter(username.eq(body.username.as_ref())).get_results::<AccountID>(db).unwrap().is_empty();
+    let exists = !accounts.filter(username.eq(body.username.clone())).get_results::<AccountID>(db).unwrap().is_empty();
     if exists {
         return HttpResponse::Conflict().json(
             serde_json::json!({"status": "fail","message": "User with that username already exists"}),
         );
     }
 
-    let salt = SaltString::generate(&mut OsRng);
-    let hashed_password = Argon2::default()
-        .hash_password(body.password_hash.as_ref().unwrap().as_bytes(), &salt)
-        .expect("Error while hashing password")
-        .to_string();
+    // let salt = SaltString::generate(&mut OsRng);
+    // let hashed_password = Argon2::default()
+    //     .hash_password(body.password_hash.as_ref().unwrap().as_bytes(), &salt)
+    //     .expect("Error while hashing password")
+    //     .to_string();
 
-    let res = diesel::insert_into(accounts).values((username.eq(&body.username), password_hash.eq(hashed_password))).get_result::<AccountID>(db);
+    // let res = diesel::insert_into(accounts).values((username.eq(&body.username), password_hash.eq(hashed_password))).get_result::<AccountID>(db);
+    // let res1 = diesel::insert_into(users).values(display_name.eq(&body.username.take().unwrap())).get_result::<DisplayUser>(db);
+    let res = makeme(db, NewUser { display_name: body.username.clone(), hash: body.password_hash.clone(), crnd: chrono::offset::Local::now().naive_utc() });
     match res {
         Ok(user) => {
             // let user_response = serde_json::json!({"status": "success","data": serde_json::json!({
@@ -286,10 +289,6 @@ async fn register_user_handler(body: web::Json<Account>, data: web::Data<AppStat
 
 #[post("/auth/login")]
 async fn login_user_handler(body: web::Json<AccountID>, data: web::Data<AppState>,) -> impl Responder {
-    // let query_result = sqlx::query_as!(User, "SELECT * FROM users WHERE email = $1", body.email)
-    //     .fetch_optional(&data.db)
-    //     .await
-    //     .unwrap();
     use crate::schema::accounts::dsl::*;
     let db = &mut data.pool.get().unwrap();
 

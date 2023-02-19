@@ -126,3 +126,16 @@ pub async fn get_question(state: web::Data<AppState>, id: web::Path<i32>) -> imp
 //         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string()))
 //     }
 // }
+
+#[get("/{id}")]
+pub async fn whoami(state: web::Data<AppState>, id: web::Path<i32>) -> impl Responder {
+    let db = &state.pool;
+    let me = crate::diesel_stex::iam(&mut db.get().unwrap(), &id);
+    match me {
+        Ok(q) => {
+            // let out = Page {q, a: crate::diesel_stex::all_answers(&mut db.get().unwrap(), &id).unwrap()};
+            HttpResponse::Ok().json(q)
+        }, 
+        Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string()))
+    }
+}
