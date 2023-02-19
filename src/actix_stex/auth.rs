@@ -34,7 +34,7 @@ pub async fn register_user_handler(
     let exists = dupe_acc(db, &body.username);
     if exists {
         return HttpResponse::Conflict().json(
-            serde_json::json!({"status": "fail","message": "User with that username already exists"}),
+            serde_json::json!({"status": "fail","message": "Doppleganger alert."}),
         );
     }
 
@@ -74,7 +74,7 @@ pub async fn login_user_handler(
             is_valid = is_valid && user.username == body.username;
             if !is_valid {
                 return HttpResponse::BadRequest()
-                    .json(json!({"status": "fail", "message": "Invalid username or password"}));
+                    .json(json!({"status": "fail", "message": "These are not the droids we are looking for."}));
             }
         }
         Err(_e) => {
