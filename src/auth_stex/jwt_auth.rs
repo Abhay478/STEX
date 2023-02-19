@@ -51,7 +51,7 @@ impl FromRequest for JwtMiddleware {
         if token.is_none() {
             let json_error = ErrorResponse {
                 status: "fail".to_string(),
-                message: "You are not logged in, please provide token".to_string(),
+                message: "Roses are red,\n violets are blue,\n please enter your credentials,\n we'd love to have you.".to_string(),
             };
             return ready(Err(ErrorUnauthorized(json_error)));
         }
@@ -65,13 +65,12 @@ impl FromRequest for JwtMiddleware {
             Err(_) => {
                 let json_error = ErrorResponse {
                     status: "fail".to_string(),
-                    message: "Invalid token".to_string(),
+                    message: "I find your lack of faith...disturbing".to_string(),
                 };
                 return ready(Err(ErrorUnauthorized(json_error)));
             }
         };
 
-        // let user_id = uuid::Uuid::parse_str(claims.sub.as_str()).unwrap();
         let user_id = claims.sub.as_str();
         req.extensions_mut().insert::<String>(user_id.to_owned());
 
