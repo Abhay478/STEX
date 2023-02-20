@@ -80,16 +80,24 @@ pub fn answer(
     diesel::insert_into(posts).values(new).get_result(db)
 }
 
-pub fn update(db: &mut PgConnection, new: &OldPost) -> Result<DisplayPost, diesel::result::Error> {
+pub fn update(
+    db: &mut PgConnection,
+    new: &OldPost,
+    me: &i32,
+) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
-    diesel::update(posts.filter(id.eq(new.id)))
+    diesel::update(posts.filter(owner_user_id.eq(me)).filter(id.eq(new.id)))
         .set((tags.eq(&new.tags), body.eq(&new.body), title.eq(&new.title)))
         .get_result(db)
 }
 
-pub fn delete(db: &mut PgConnection, kill: &i32) -> Result<DisplayPost, diesel::result::Error> {
+pub fn delete(
+    db: &mut PgConnection,
+    kill: &i32,
+    me: &i32,
+) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
-    diesel::delete(posts.filter(id.eq(kill))).get_result(db)
+    diesel::delete(posts.filter(owner_user_id.eq(me)).filter(id.eq(kill))).get_result(db)
 }
 
 pub fn all_answers(

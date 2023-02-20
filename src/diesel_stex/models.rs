@@ -17,7 +17,7 @@ pub struct AutocParams {
 
 #[derive(Deserialize, Serialize, Queryable, Debug)]
 pub struct AutocParamsInt {
-    pub q: usize,
+    pub q: i32,
 }
 
 #[derive(Deserialize, Serialize, Queryable, Debug)]
