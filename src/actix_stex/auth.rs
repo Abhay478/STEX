@@ -41,7 +41,7 @@ pub async fn register_user_handler(
         db,
         NewUser {
             display_name: body.username.clone(),
-            hash: body.password_hash.clone(),
+            hash: body.password.clone(),
             crnd: chrono::offset::Local::now().naive_utc(),
         },
     );
@@ -63,8 +63,8 @@ pub async fn login_user_handler(
 
     match &query_result {
         Ok(user) => {
-            let othertemp = body.clone().password_hash.unwrap();
-            let temp = user.clone().password_hash.unwrap();
+            let othertemp = body.clone().password.unwrap();
+            let temp = user.clone().password.unwrap();
             let parsed_hash = PasswordHash::new(temp.as_str()).unwrap();
             let mut is_valid = Argon2::default()
                 .verify_password(othertemp.as_bytes(), &parsed_hash)

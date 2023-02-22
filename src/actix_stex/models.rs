@@ -7,7 +7,7 @@ use serde_derive::{Deserialize, Serialize};
 #[diesel(table_name = accounts)]
 pub struct Account {
     pub username: String,
-    pub password_hash: String,
+    pub password: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, Queryable, Insertable, Clone)]
@@ -15,7 +15,7 @@ pub struct Account {
 pub struct AccountID {
     pub id: i32,
     pub username: Option<String>,
-    pub password_hash: Option<String>,
+    pub password: Option<String>,
 }
 
 #[derive(Deserialize, Serialize)]

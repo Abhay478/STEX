@@ -4,7 +4,7 @@ diesel::table! {
     accounts (id) {
         id -> Int4,
         username -> Nullable<Varchar>,
-        password_hash -> Nullable<Varchar>,
+        password -> Nullable<Varchar>,
     }
 }
 

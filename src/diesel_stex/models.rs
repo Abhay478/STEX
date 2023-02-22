@@ -106,6 +106,15 @@ pub struct DisplayUser {
     pub last_access_date: NaiveDateTime,   // TIMESTAMP NOT NULL
 }
 
+#[derive(Insertable, Deserialize, Queryable, Serialize, Debug)]
+#[diesel(table_name = users)]
+pub struct UsersPKey {
+    pub id: i32,
+    pub display_name: String,
+    pub creation_date: NaiveDateTime,    
+    pub last_access_date: NaiveDateTime,    
+}
+
 #[derive(Insertable, Serialize, Deserialize)]
 #[diesel(table_name = posts)]
 pub struct NewPost {

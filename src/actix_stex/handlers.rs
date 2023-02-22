@@ -9,6 +9,7 @@ use crate::{
     diesel_stex::{handlers::*, models::*},
 };
 
+/// Autocomplete for users: Provide query thus: "/auto/u?q=<prefix>"
 #[get("/auto/u")]
 pub async fn get_names(
     state: web::Data<AppState>,
@@ -20,6 +21,7 @@ pub async fn get_names(
     HttpResponse::Ok().json(all)
 }
 
+/// Autocomplete for tags: Provide query thus: "/auto/t?q=<prefix>"
 #[get("/auto/t")]
 pub async fn get_tags(
     state: web::Data<AppState>,
@@ -31,6 +33,7 @@ pub async fn get_tags(
     HttpResponse::Ok().json(all)
 }
 
+/// Autocomplete for posts: Provide query thus: "/auto/p?q=<prefix>"
 #[get("/auto/p")]
 pub async fn get_posts(
     state: web::Data<AppState>,
@@ -42,6 +45,7 @@ pub async fn get_posts(
     HttpResponse::Ok().json(all)
 }
 
+/// Post data dump: Provide query thus: "/search/post_title?q=<title>"
 #[get("/search/post_title")]
 pub async fn get_post_by_title(
     state: web::Data<AppState>,
@@ -53,6 +57,8 @@ pub async fn get_post_by_title(
     HttpResponse::Ok().json(post)
 }
 
+
+/// Post data dump: Provide query thus: "/search/post_owner?q=<owner_user_id>". If not provided, defaults to -1 (Community).
 #[get("/search/post_owner")]
 pub async fn get_post_by_owner(
     state: web::Data<AppState>,
@@ -64,6 +70,7 @@ pub async fn get_post_by_owner(
     HttpResponse::Ok().json(post)
 }
 
+/// Post data dump: Provide query thus: "/search/post_owner?q=<tag_name>".
 #[get("/search/post_tag")]
 pub async fn get_post_by_tag(
     state: web::Data<AppState>,
@@ -75,6 +82,7 @@ pub async fn get_post_by_tag(
     HttpResponse::Ok().json(post)
 }
 
+/// Post body requires owner id (same as in path), title, tags and body and date-time optional.
 #[post("{id}/post/new")]
 pub async fn insert_post(
     state: web::Data<AppState>,
@@ -90,6 +98,7 @@ pub async fn insert_post(
     }
 }
 
+/// Post body requires owner id (same as in path), title, tags and body and parent post (question) id.
 #[post("{id}/post/answer")]
 pub async fn answer_to_post(
     state: web::Data<AppState>,
@@ -105,6 +114,7 @@ pub async fn answer_to_post(
     }
 }
 
+/// Post body requires post id (not same as in path), title, tags and body.
 #[post("{id}/post/update")]
 pub async fn update_post(
     state: web::Data<AppState>,
@@ -123,6 +133,7 @@ pub async fn update_post(
     }
 }
 
+/// Query parameter thus: "{id}/post/delete/q=<id>"
 #[delete("{id}/post/delete")]
 pub async fn delete_post(
     state: web::Data<AppState>,
@@ -159,18 +170,20 @@ pub async fn get_question(state: web::Data<AppState>, id: web::Path<i32>) -> imp
     }
 }
 
-#[get("/{id}")]
+#[get("/me")]
 pub async fn whoami(
     state: web::Data<AppState>, 
-    id: web::Path<i32>
+    me: JwtMiddleware
 ) -> impl Responder {
     let db = &state.pool;
-    let me = iam(&mut db.get().unwrap(), &id);
-    match me {
-        Ok(q) => {
-            // let out = Page {q, a: all_answers(&mut db.get().unwrap(), &id).unwrap()};
-            HttpResponse::Ok().json(q)
-        }
-        Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),
-    }
+    // let me = ;
+    // match me {
+    //     Ok(q) => {
+    //         // let out = Page {q, a: all_answers(&mut db.get().unwrap(), &id).unwrap()};
+    //         HttpResponse::Ok().json(q)
+    //     }
+    //     Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),
+    // }
+
+    HttpResponse::Ok().json(iam(&mut db.get().unwrap(), &me.user_id.parse().unwrap()).unwrap())
 }
