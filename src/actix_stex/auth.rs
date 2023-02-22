@@ -23,6 +23,7 @@ async fn health_checker_handler() -> impl Responder {
     HttpResponse::Ok().json(json!({"status": "success", "message": MESSAGE}))
 }
 
+/// Provide username and password. Returns username, password and id.
 #[post("/auth/register")]
 pub async fn register_user_handler(
     body: web::Json<Account>,
@@ -52,6 +53,7 @@ pub async fn register_user_handler(
     }
 }
 
+/// Provide username, password and id. Returns token and cookie.
 #[post("/auth/login")]
 pub async fn login_user_handler(
     body: web::Json<AccountID>,
