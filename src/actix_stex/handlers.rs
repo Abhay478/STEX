@@ -57,7 +57,6 @@ pub async fn get_post_by_title(
     HttpResponse::Ok().json(post)
 }
 
-
 /// Post data dump: Provide query thus: "/search/post_owner?q=<owner_user_id>". If not provided, defaults to -1 (Community).
 #[get("/search/post_owner")]
 pub async fn get_post_by_owner(
@@ -171,10 +170,7 @@ pub async fn get_question(state: web::Data<AppState>, id: web::Path<i32>) -> imp
 }
 
 #[get("/me")]
-pub async fn whoami(
-    state: web::Data<AppState>, 
-    me: JwtMiddleware
-) -> impl Responder {
+pub async fn whoami(state: web::Data<AppState>, me: JwtMiddleware) -> impl Responder {
     let db = &state.pool;
     // let me = ;
     // match me {
@@ -188,7 +184,6 @@ pub async fn whoami(
     HttpResponse::Ok().json(iam(&mut db.get().unwrap(), &me.user_id.parse().unwrap()).unwrap())
 }
 
-
 // to update about_me
 #[post("/{id}/bio")]
 pub async fn bio(state: web::Data<AppState>, id: web::Path<i32>, new: String) -> impl Responder {
@@ -197,4 +192,3 @@ pub async fn bio(state: web::Data<AppState>, id: web::Path<i32>, new: String) ->
 
     HttpResponse::Ok().json(res.unwrap())
 }
-

@@ -111,8 +111,8 @@ pub struct DisplayUser {
 pub struct UsersPKey {
     pub id: i32,
     pub display_name: String,
-    pub creation_date: NaiveDateTime,    
-    pub last_access_date: NaiveDateTime,    
+    pub creation_date: NaiveDateTime,
+    pub last_access_date: NaiveDateTime,
 }
 
 #[derive(Insertable, Serialize, Deserialize)]
