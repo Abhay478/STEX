@@ -168,6 +168,11 @@ pub fn acc_by_id(db: &mut PgConnection, idd: &i32) -> Result<AccountID, diesel::
     accounts.filter(id.eq(idd)).get_result::<AccountID>(db)
 }
 
+pub fn acc_by_unm(db: &mut PgConnection, idd: &str) -> Result<AccountID, diesel::result::Error> {
+    use crate::schema::accounts::dsl::*;
+    accounts.filter(username.eq(idd)).get_result::<AccountID>(db)
+}
+
 pub fn dupe_acc(db: &mut PgConnection, unm: &str) -> bool {
     use crate::schema::accounts::dsl::*;
     !accounts

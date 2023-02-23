@@ -1,7 +1,7 @@
 use crate::{
     actix_stex::models::{Account, AccountID},
     auth_stex::jwt_auth::{self, TokenClaims},
-    diesel_stex::handlers::{acc_by_id, dupe_acc, makeme},
+    diesel_stex::handlers::{acc_by_id, dupe_acc, makeme, acc_by_unm},
     AppState,
 };
 use actix_web::{
@@ -61,18 +61,41 @@ pub async fn login_user_handler(
 ) -> impl Responder {
     let db = &mut data.pool.get().unwrap();
 
-    let query_result = acc_by_id(db, &body.id);
+    // let query_result = acc_by_id(db, &body.id);
+
+    // match &query_result {
+    //     Ok(user) => {
+    //         let othertemp = body.clone().password.unwrap();
+    //         let temp = user.clone().password.unwrap();
+    //         let parsed_hash = PasswordHash::new(temp.as_str()).unwrap();
+    //         let mut is_valid = Argon2::default()
+    //             .verify_password(othertemp.as_bytes(), &parsed_hash)
+    //             .map_or(false, |_| true);
+
+    //         is_valid = is_valid && user.username == body.username;
+    //         if !is_valid {
+    //             return HttpResponse::BadRequest()
+    //                 .json(json!({"status": "fail", "message": "These are not the droids we are looking for."}));
+    //         }
+    //     }
+    //     Err(_e) => {
+    //         return HttpResponse::BadRequest()
+    //             .json(json!({"status": "fail", "message": "No record."}));
+    //     }
+    // }
+
+    let query_result = acc_by_unm(db, &body.username);
 
     match &query_result {
         Ok(user) => {
-            let othertemp = body.clone().password.unwrap();
-            let temp = user.clone().password.unwrap();
+            let othertemp = body.clone().password;
+            let temp = user.clone().password;
             let parsed_hash = PasswordHash::new(temp.as_str()).unwrap();
             let mut is_valid = Argon2::default()
                 .verify_password(othertemp.as_bytes(), &parsed_hash)
                 .map_or(false, |_| true);
 
-            is_valid = is_valid && user.username == body.username;
+            is_valid = is_valid;
             if !is_valid {
                 return HttpResponse::BadRequest()
                     .json(json!({"status": "fail", "message": "These are not the droids we are looking for."}));
@@ -83,6 +106,7 @@ pub async fn login_user_handler(
                 .json(json!({"status": "fail", "message": "No record."}));
         }
     }
+
 
     let user = query_result.unwrap();
 

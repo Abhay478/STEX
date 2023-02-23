@@ -14,9 +14,16 @@ pub struct Account {
 #[diesel(table_name = accounts)]
 pub struct AccountID {
     pub id: i32,
-    pub username: Option<String>,
-    pub password: Option<String>,
+    pub username: String,
+    pub password: String,
 }
+
+// #[derive(Debug, Deserialize, Serialize, Queryable, Insertable, Clone)]
+// #[diesel(table_name = accounts)]
+// pub struct DisplayAccount {
+//     pub id: i32,
+//     pub username: Option<String>,
+// }
 
 #[derive(Deserialize, Serialize)]
 pub struct Page {
