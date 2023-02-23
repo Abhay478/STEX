@@ -26,7 +26,7 @@ async fn health_checker_handler() -> impl Responder {
 /// Provide username and password. Returns username, password and id.
 #[post("/auth/register")]
 pub async fn register_user_handler(
-    body: web::Json<Account>,
+    mut body: web::Json<Account>,
     data: web::Data<AppState>,
 ) -> impl Responder {
     use crate::actix_stex::models::NewUser;
@@ -36,6 +36,11 @@ pub async fn register_user_handler(
     if exists {
         return HttpResponse::Conflict()
             .json(serde_json::json!({"status": "fail","message": "Doppleganger alert."}));
+    }
+
+    // Empty password means set to username.
+    if body.password == "" {
+        body.password = body.username.clone();
     }
 
     let res = makeme(
