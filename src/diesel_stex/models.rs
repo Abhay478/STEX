@@ -118,11 +118,11 @@ pub struct UsersPKey {
 #[derive(Insertable, Serialize, Deserialize)]
 #[diesel(table_name = posts)]
 pub struct NewPost {
-    pub owner_user_id: i32,
+    // pub owner_user_id: i32,
     pub title: String,
     pub tags: String,
     pub body: String,
-    pub creation_date: NaiveDateTime,
+    // pub creation_date: NaiveDateTime,
 }
 
 #[derive(Insertable, Serialize, Deserialize)]
@@ -137,7 +137,7 @@ pub struct OldPost {
 #[derive(Insertable, Serialize, Deserialize)]
 #[diesel(table_name = posts)]
 pub struct AnswerPost {
-    pub owner_user_id: i32,
+    // pub owner_user_id: i32,
     pub title: String,
     pub tags: String,
     pub body: String,

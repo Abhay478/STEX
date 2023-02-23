@@ -65,19 +65,21 @@ pub fn post_search_many_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPos
 
 pub fn new_post(
     db: &mut PgConnection,
-    new: &mut NewPost,
+    new: &NewPost,
+    oid: &i32
 ) -> Result<DisplayPost, diesel::result::Error> {
-    use crate::schema::posts::dsl::posts;
-    new.creation_date = chrono::offset::Local::now().naive_utc();
-    diesel::insert_into(posts).values(&*new).get_result(db)
+    use crate::schema::posts::dsl::*;
+    // new.creation_date = chrono::offset::Local::now().naive_utc();
+    diesel::insert_into(posts).values((&*new, owner_user_id.eq(oid), id.eq(&get_next_pid(db)), creation_date.eq(chrono::offset::Local::now().naive_utc()))).get_result(db)
 }
 
 pub fn answer(
     db: &mut PgConnection,
     new: &AnswerPost,
+    oid: &i32
 ) -> Result<DisplayPost, diesel::result::Error> {
-    use crate::schema::posts::dsl::posts;
-    diesel::insert_into(posts).values(new).get_result(db)
+    use crate::schema::posts::dsl::*;
+    diesel::insert_into(posts).values((new, owner_user_id.eq(oid), id.eq(&get_next_pid(db)), creation_date.eq(chrono::offset::Local::now().naive_utc()))).get_result(db)
 }
 
 pub fn update(
@@ -128,6 +130,11 @@ fn get_next_uid(db: &mut PgConnection) -> i32 {
     users.select(id).order(id.desc()).limit(1).get_result::<i32>(db).unwrap() + 1
 }
 
+fn get_next_pid(db: &mut PgConnection) -> i32 {
+    use crate::schema::posts::dsl::*;
+    posts.select(id).order(id.desc()).limit(1).get_result::<i32>(db).unwrap() + 1
+}
+
 pub fn makeme(db: &mut PgConnection, body: NewUser) -> Result<AccountID, diesel::result::Error> {
     use crate::schema::accounts::dsl::*;
     use crate::schema::users::dsl::*;
@@ -168,4 +175,9 @@ pub fn dupe_acc(db: &mut PgConnection, unm: &str) -> bool {
         .get_results::<AccountID>(db)
         .unwrap()
         .is_empty()
+}
+
+pub fn make_bio(db: &mut PgConnection, bio: &str, idd: &i32) -> Result<DisplayUser, diesel::result::Error> {
+    use crate::schema::users::dsl::*;
+    diesel::update(users).filter(id.eq(idd)).set(about_me.eq(bio)).get_result(db)
 }

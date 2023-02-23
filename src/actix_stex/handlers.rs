@@ -87,11 +87,11 @@ pub async fn get_post_by_tag(
 pub async fn insert_post(
     state: web::Data<AppState>,
     mut new: web::Json<NewPost>,
-    _idd: web::Path<i32>,
+    idd: web::Path<i32>,
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = new_post(&mut db.get().unwrap(), &mut new.0);
+    let post = new_post(&mut db.get().unwrap(), &mut new.0, &idd);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::Ok().json(format!("Can't do that: {}.", e.to_string())),
@@ -103,11 +103,11 @@ pub async fn insert_post(
 pub async fn answer_to_post(
     state: web::Data<AppState>,
     new: web::Json<AnswerPost>,
-    _idd: web::Path<i32>,
+    idd: web::Path<i32>,
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = answer(&mut db.get().unwrap(), &new.0);
+    let post = answer(&mut db.get().unwrap(), &new.0, &idd);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::Ok().json(format!("Can't do that: {}.", e.to_string())),
@@ -187,3 +187,14 @@ pub async fn whoami(
 
     HttpResponse::Ok().json(iam(&mut db.get().unwrap(), &me.user_id.parse().unwrap()).unwrap())
 }
+
+
+// to update about_me
+#[post("/{id}/bio")]
+pub async fn bio(state: web::Data<AppState>, id: web::Path<i32>, new: String) -> impl Responder {
+    let db = &state.pool;
+    let res = make_bio(&mut db.get().unwrap(), &new, &id);
+
+    HttpResponse::Ok().json(res.unwrap())
+}
+
