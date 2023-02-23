@@ -1,7 +1,7 @@
 use crate::{
-    actix_stex::models::{Account, AccountID},
+    actix_stex::models::{Account},
     auth_stex::jwt_auth::{self, TokenClaims},
-    diesel_stex::handlers::{acc_by_id, acc_by_unm, dupe_acc, makeme},
+    diesel_stex::handlers::{acc_by_unm, dupe_acc, makeme},
     AppState,
 };
 use actix_web::{
@@ -56,7 +56,7 @@ pub async fn register_user_handler(
 /// Provide username, password and id. Returns token and cookie.
 #[post("/auth/login")]
 pub async fn login_user_handler(
-    body: web::Json<AccountID>,
+    body: web::Json<Account>,
     data: web::Data<AppState>,
 ) -> impl Responder {
     let db = &mut data.pool.get().unwrap();
@@ -84,7 +84,7 @@ pub async fn login_user_handler(
     //     }
     // }
 
-    let query_result = acc_by_unm(db, &*body.username.as_ref().unwrap());
+    let query_result = acc_by_unm(db, &*body.username);
 
     match &query_result {
         Ok(user) => {
@@ -92,7 +92,7 @@ pub async fn login_user_handler(
             let temp = user.clone().password;
             let parsed_hash = PasswordHash::new(&*temp.as_ref().unwrap()).unwrap();
             let mut is_valid = Argon2::default()
-                .verify_password(othertemp.unwrap().as_bytes(), &parsed_hash)
+                .verify_password(othertemp.as_bytes(), &parsed_hash)
                 .map_or(false, |_| true);
 
             is_valid = is_valid;

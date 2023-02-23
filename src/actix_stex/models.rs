@@ -18,6 +18,13 @@ pub struct AccountID {
     pub password: Option<String>,
 }
 
+#[derive(Debug, Deserialize, Serialize, Queryable, Insertable, Clone)]
+#[diesel(table_name = accounts)]
+pub struct AccountReg {
+    pub id: i32,
+    pub username: Option<String>,
+}
+
 // #[derive(Debug, Deserialize, Serialize, Queryable, Insertable, Clone)]
 // #[diesel(table_name = accounts)]
 // pub struct DisplayAccount {
