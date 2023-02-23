@@ -66,20 +66,34 @@ pub fn post_search_many_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPos
 pub fn new_post(
     db: &mut PgConnection,
     new: &NewPost,
-    oid: &i32
+    oid: &i32,
 ) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
     // new.creation_date = chrono::offset::Local::now().naive_utc();
-    diesel::insert_into(posts).values((&*new, owner_user_id.eq(oid), id.eq(&get_next_pid(db)), creation_date.eq(chrono::offset::Local::now().naive_utc()))).get_result(db)
+    diesel::insert_into(posts)
+        .values((
+            &*new,
+            owner_user_id.eq(oid),
+            id.eq(&get_next_pid(db)),
+            creation_date.eq(chrono::offset::Local::now().naive_utc()),
+        ))
+        .get_result(db)
 }
 
 pub fn answer(
     db: &mut PgConnection,
     new: &AnswerPost,
-    oid: &i32
+    oid: &i32,
 ) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
-    diesel::insert_into(posts).values((new, owner_user_id.eq(oid), id.eq(&get_next_pid(db)), creation_date.eq(chrono::offset::Local::now().naive_utc()))).get_result(db)
+    diesel::insert_into(posts)
+        .values((
+            new,
+            owner_user_id.eq(oid),
+            id.eq(&get_next_pid(db)),
+            creation_date.eq(chrono::offset::Local::now().naive_utc()),
+        ))
+        .get_result(db)
 }
 
 pub fn update(
@@ -127,12 +141,24 @@ pub fn iam(db: &mut PgConnection, idd: &i32) -> Result<DisplayUser, diesel::resu
 
 fn get_next_uid(db: &mut PgConnection) -> i32 {
     use crate::schema::users::dsl::*;
-    users.select(id).order(id.desc()).limit(1).get_result::<i32>(db).unwrap() + 1
+    users
+        .select(id)
+        .order(id.desc())
+        .limit(1)
+        .get_result::<i32>(db)
+        .unwrap()
+        + 1
 }
 
 fn get_next_pid(db: &mut PgConnection) -> i32 {
     use crate::schema::posts::dsl::*;
-    posts.select(id).order(id.desc()).limit(1).get_result::<i32>(db).unwrap() + 1
+    posts
+        .select(id)
+        .order(id.desc())
+        .limit(1)
+        .get_result::<i32>(db)
+        .unwrap()
+        + 1
 }
 
 pub fn makeme(db: &mut PgConnection, body: NewUser) -> Result<AccountID, diesel::result::Error> {
@@ -149,7 +175,12 @@ pub fn makeme(db: &mut PgConnection, body: NewUser) -> Result<AccountID, diesel:
         .expect("Error while hashing password")
         .to_string();
 
-    let new = UsersPKey {id: get_next_uid(db), display_name: body.display_name.clone(), creation_date: body.crnd, last_access_date: body.crnd};
+    let new = UsersPKey {
+        id: get_next_uid(db),
+        display_name: body.display_name.clone(),
+        creation_date: body.crnd,
+        last_access_date: body.crnd,
+    };
     let res1 = diesel::insert_into(users)
         .values(new)
         .get_result::<DisplayUser>(db)?;
@@ -170,7 +201,9 @@ pub fn acc_by_id(db: &mut PgConnection, idd: &i32) -> Result<AccountID, diesel::
 
 pub fn acc_by_unm(db: &mut PgConnection, idd: &str) -> Result<AccountID, diesel::result::Error> {
     use crate::schema::accounts::dsl::*;
-    accounts.filter(username.eq(idd)).get_result::<AccountID>(db)
+    accounts
+        .filter(username.eq(idd))
+        .get_result::<AccountID>(db)
 }
 
 pub fn dupe_acc(db: &mut PgConnection, unm: &str) -> bool {
@@ -182,7 +215,14 @@ pub fn dupe_acc(db: &mut PgConnection, unm: &str) -> bool {
         .is_empty()
 }
 
-pub fn make_bio(db: &mut PgConnection, bio: &str, idd: &i32) -> Result<DisplayUser, diesel::result::Error> {
+pub fn make_bio(
+    db: &mut PgConnection,
+    bio: &str,
+    idd: &i32,
+) -> Result<DisplayUser, diesel::result::Error> {
     use crate::schema::users::dsl::*;
-    diesel::update(users).filter(id.eq(idd)).set(about_me.eq(bio)).get_result(db)
+    diesel::update(users)
+        .filter(id.eq(idd))
+        .set(about_me.eq(bio))
+        .get_result(db)
 }
