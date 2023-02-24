@@ -24,19 +24,19 @@ async fn health_checker_handler() -> impl Responder {
 }
 
 /// Provide username and password. Returns username, password and id.
-/// Req: 
+/// Req:
 ///      {
 ///          "username" : "x"
 ///          "password" : "x"
 ///      }
-/// 
-/// Res: 
+///
+/// Res:
 ///      {
 ///          "id" : <Some number>
 ///          "username" : "x"
 ///          "password" : some shit
 ///      }
-/// 
+///
 #[post("/auth/register")]
 pub async fn register_user_handler(
     mut body: web::Json<Account>,
@@ -72,18 +72,18 @@ pub async fn register_user_handler(
 }
 
 /// Provide username, password and id. Returns token and cookie.
-/// Req: 
+/// Req:
 ///      {
 ///          "username" : "x"
 ///          "password" : "x"
 ///      }
-/// 
-/// Res: 
+///
+/// Res:
 ///      {
 ///          "status" : "success"
 ///          "token" : some shit
 ///      }
-/// 
+///
 #[post("/auth/login")]
 pub async fn login_user_handler(
     body: web::Json<Account>,

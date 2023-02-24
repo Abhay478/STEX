@@ -1,6 +1,6 @@
 use actix_web::{
     delete, get, post,
-    web::{Data, Query, Path, Json},
+    web::{Data, Json, Path, Query},
     HttpResponse, Responder,
 };
 
@@ -337,14 +337,14 @@ pub async fn answer_to_post(
 }
 
 /// Post body requires post id (not same as in path), title, tags and body.
-/// Req: 
+/// Req:
 /// {
 /// 	"id": 442656,
 ///    "title": "Meh-updated",
 ///    "tags": "<meh><answer><update>",
 ///    "body": "Meh2 Updated"
 /// }
-/// 
+///
 /// Res: DisplayPost, looks like
 /// {
 ///     "id": 180531,
@@ -433,7 +433,7 @@ pub async fn delete_post(
 }
 
 /// Route responds to a get request with struct containing the post corresponding to that id, and all answers to that post.
-/// Res: 
+/// Res:
 /// {
 /// 	"q": DisplaPost, see above
 /// 	"a": list of DisplayPost, see above
@@ -460,7 +460,7 @@ pub async fn get_question(
 }
 
 /// Returns profile
-/// Res: 
+/// Res:
 /// {
 /// 	"id": 423932,
 /// 	"account_id": null,
@@ -479,7 +479,7 @@ pub async fn get_question(
 #[get("/me")]
 pub async fn whoami(state: Data<AppState>, me: JwtMiddleware) -> impl Responder {
     let db = &state.pool;
-	let I = iam(&mut db.get().unwrap(), &me.user_id.parse().unwrap()).unwrap();
+    let I = iam(&mut db.get().unwrap(), &me.user_id.parse().unwrap()).unwrap();
     HttpResponse::Ok().json(I)
 }
 
