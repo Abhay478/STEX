@@ -3,6 +3,7 @@ use diesel::{pg::*, prelude::*};
 use super::models::*;
 use crate::actix_stex::models::{AccountID, NewUser};
 
+// Autocorrect
 pub fn get_all_dnames(db: &mut PgConnection, prefix: &str) -> Vec<User> {
     use crate::schema::users::{display_name, dsl, id};
     dsl::users
@@ -31,26 +32,40 @@ pub fn get_all_tagnames(db: &mut PgConnection, prefix: &str) -> Vec<APIResult> {
         .unwrap()
 }
 
+// Search
 pub fn post_search_title(db: &mut PgConnection, req: &str) -> Vec<DisplayPost> {
     use crate::schema::posts::*;
     dsl::posts
         .filter(title.ilike(format!("%{req}%")))
+        .filter(parent_id.is_null())
         .get_results::<DisplayPost>(db)
         .unwrap()
 }
 
-pub fn post_search_owner(db: &mut PgConnection, req: i32) -> Vec<DisplayPost> {
+pub fn question_search_owner(db: &mut PgConnection, req: i32) -> Vec<DisplayPost> {
     use crate::schema::posts::*;
     dsl::posts
         .filter(owner_user_id.eq(req))
+        .filter(parent_id.is_null())
         .get_results::<DisplayPost>(db)
         .unwrap()
 }
+
+pub fn answer_search_owner(db: &mut PgConnection, req: i32) -> Vec<DisplayPost> {
+    use crate::schema::posts::*;
+    dsl::posts
+        .filter(owner_user_id.eq(req))
+        .filter(parent_id.is_not_null())
+        .get_results::<DisplayPost>(db)
+        .unwrap()
+}
+
 
 pub fn post_search_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPost> {
     use crate::schema::posts::{dsl::posts, *};
     posts
         .filter(tags.ilike(format!("%{req}%")))
+        .filter(parent_id.is_null())
         .get_results::<DisplayPost>(db)
         .unwrap()
 }

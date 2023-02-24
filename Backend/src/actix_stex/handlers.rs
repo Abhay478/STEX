@@ -90,7 +90,7 @@ pub async fn get_qa(
     HttpResponse::Ok().json(all)
 }
 
-/// Post data dump: Provide query thus: "/search/post_title?q=title"
+/// Post data dump: Provide query thus: "/search/title?q=title"
 /// Returns:
 /// [
 /// {
@@ -153,7 +153,7 @@ pub async fn get_question_by_title(
     HttpResponse::Ok().json(post)
 }
 
-/// Post data dump: Provide query thus: "/search/post_owner?q=owner_user_id". If not provided, defaults to -1 (Community).
+/// Post data dump: Provide query thus: "/search/owner/question?q=owner_user_id". If not provided, defaults to -1 (Community).
 /// [
 ///    {
 ///        "id": 67160,
@@ -204,18 +204,81 @@ pub async fn get_question_by_title(
 ///        "last_activity_date": "2013-03-02T06:31:46.033"
 ///    }
 /// ]
-#[get("/search/owner")]
-pub async fn get_qa_by_owner(
+#[get("/search/owner/question")]
+pub async fn get_questions_by_owner(
     state: Data<AppState>,
     oid: Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = post_search_owner(&mut db.get().unwrap(), oid.q.parse().unwrap_or(-1));
+    let post = question_search_owner(&mut db.get().unwrap(), oid.q.parse().unwrap_or(-1));
     HttpResponse::Ok().json(post)
 }
 
-/// Post data dump: Provide query thus: "/search/post_owner?q=<tag_name>".
+/// Post data dump: Provide query thus: "/search/owner/answer?q=owner_user_id". If not provided, defaults to -1 (Community).
+/// [
+///    {
+///        "id": 67160,
+///        "owner_user_id": -1,
+///        "last_editor_user_id": -1,
+///        "post_type_id": 5,
+///        "accepted_answer_id": null,
+///        "score": 0,
+///        "parent_id": null,
+///        "view_count": null,
+///        "answer_count": null,
+///        "comment_count": 0,
+///        "owner_display_name": null,
+///        "last_editor_display_name": null,
+///        "title": null,
+///        "tags": null,
+///        "content_license": "CC BY-SA 3.0",
+///        "body": null,
+///        "favorite_count": null,
+///        "creation_date": "2011-04-11T13:35:04.670",
+///        "community_owned_date": null,
+///        "closed_date": null,
+///        "last_edit_date": "2011-04-11T13:35:04.670",
+///        "last_activity_date": "2011-04-11T13:35:04.670"
+///    },
+///    {
+///        "id": 1462,
+///        "owner_user_id": -1,
+///        "last_editor_user_id": 25936,
+///        "post_type_id": 7,
+///        "accepted_answer_id": null,
+///        "score": 0,
+///        "parent_id": null,
+///        "view_count": null,
+///        "answer_count": null,
+///        "comment_count": 0,
+///        "owner_display_name": null,
+///        "last_editor_display_name": null,
+///        "title": null,
+///        "tags": null,
+///        "content_license": "CC BY-SA 3.0",
+///        "body": "<p>Programmers — Stack Exchange is a site for professional programmers who are interested in getting expert answers on conceptual questions about software development. If you have a question about...</p>\n\n<ul>\n<li>algorithm and data structure concepts</li>\n<li>design patterns</li>\n<li>developer testing</li>\n<li>development methodologies</li>\n<li>freelancing and business concerns</li>\n<li>quality assurance</li>\n<li>software architecture</li>\n<li>software engineering</li>\n<li>software licensing</li>\n</ul>\n\n<p>and it is <strong>not about</strong>...</p>\n\n<ul>\n<li>general workplace issues, office politics, résumé help (check out <a href=\"http://workplace.stackexchange.com/\">The Workplace</a> instead),</li>\n<li>implementation issues or programming tools (ask on <a href=\"http://www.stackoverflow.com/\">Stack Overflow</a> instead),</li>\n<li>what language/technology you should learn next, including <a href=\"http://blog.stackoverflow.com/2011/08/gorilla-vs-shark/\">which technology is better</a>,</li>\n<li>what project you should do next,</li>\n<li>what book you should read next,</li>\n<li><a href=\"http://meta.programmers.stackexchange.com/questions/588/are-career-advice-questions-useful-to-anyone-except-the-poster/590#590\">career advice</a>, salary or compensation,</li>\n<li>personal lifestyle, including relationships, and non-programming activities</li>\n</ul>\n\n<p>...then you're in the right place to ask your question!</p>\n\n<p>Please make sure your question uniquely applies to programmers in general:</p>\n\n<p><img src=\"https://i.stack.imgur.com/ociNc.png\" alt=\"proper scope for question\"></p>\n\n<h2>What about subjective questions?</h2>\n\n<p>Subjective questions are allowed, but subjective does not mean &ldquo;anything goes&rdquo;. <strong>Please keep it professional at all times</strong>. If this is a question you'd be uncomfortable discussing with your colleagues in a work environment, it's probably not appropriate here, either.</p>\n\n<p>All subjective questions are expected to be <em>constructive</em>. How do we define that?  Constructive subjective questions &hellip;</p>\n\n<ul>\n<li>inspire answers that explain “why” and “how”.</li>\n<li>tend to have long, not short, answers.</li>\n<li>have a constructive, fair, and impartial tone.</li>\n<li>invite sharing experiences over opinions.</li>\n<li>insist that opinion be backed up with facts and references.</li>\n<li>are more than just mindless social fun.</li>\n</ul>\n\n<p>Questions that do not meet enough of these six guidelines will be closed as \"Not Constructive\". Please see the <a href=\"http://blog.stackoverflow.com/2010/09/good-subjective-bad-subjective\">Good Subjective, Bad Subjective</a> and <a href=\"http://blog.stackoverflow.com/2011/01/real-questions-have-answers/\">Real Questions Have Answers</a> blog posts for more details and examples.</p>\n",
+///        "favorite_count": null,
+///        "creation_date": "2010-09-08T22:37:51.210",
+///        "community_owned_date": "2011-07-05T10:09:01.537",
+///        "closed_date": null,
+///        "last_edit_date": "2013-03-02T06:31:46.033",
+///        "last_activity_date": "2013-03-02T06:31:46.033"
+///    }
+/// ]
+#[get("/search/owner/answer")]
+pub async fn get_answers_by_owner(
+    state: Data<AppState>,
+    oid: Query<Params>,
+    // _: JwtMiddleware,
+) -> impl Responder {
+    let db = &state.pool;
+    let post = answer_search_owner(&mut db.get().unwrap(), oid.q.parse().unwrap_or(-1));
+    HttpResponse::Ok().json(post)
+}
+
+
+/// Post data dump: Provide query thus: "/search/tag?q=<tag_name>".
 /// Looks just like the other two.
 #[get("/search/tag")]
 pub async fn get_qa_by_tag(
@@ -228,7 +291,7 @@ pub async fn get_qa_by_tag(
     HttpResponse::Ok().json(post)
 }
 
-/// Post data dump: Provide query thus: "/search/post_owner?q=<tag_name1><tag_name2>".
+/// Post data dump: Provide query thus: "/search/tags?q=<tag_name1><tag_name2>".
 /// Looks just like the other two.
 #[get("/search/tags")]
 pub async fn get_qa_by_tags(
