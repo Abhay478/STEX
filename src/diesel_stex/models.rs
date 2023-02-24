@@ -61,7 +61,7 @@ pub struct Tag {
 //     pub tags: Vec<String>,
 // }
 
-#[derive(Queryable, Serialize, Deserialize)]
+#[derive(Queryable, Serialize, Deserialize, PartialEq, Clone)]
 #[diesel(table_name = posts)]
 pub struct DisplayPost {
     pub id: i32,

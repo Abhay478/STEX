@@ -69,17 +69,31 @@ pub fn post_search_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPost> {
 // }
 
 pub fn post_search_many_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPost> {
-    use crate::schema::posts::{dsl::posts, *};
-    let mut v: Vec<String> = req.split("<").map(|s| String::from("<") + s).collect();
+    let mut v: Vec<String> = req
+        .chars()
+        .filter(|u| !u.is_whitespace())
+        .collect::<String>()
+        .split("<")
+        .map(|s| String::from("<") + s)
+        .collect();
     v.remove(0);
-    let s = v
-        .iter()
-        .fold(String::from("%"), |net, tag| net + tag.as_str() + "%");
 
-    posts
-        .filter(tags.ilike(s))
-        .get_results::<DisplayPost>(db)
-        .unwrap()
+    let inds = v
+        .iter()
+        .map(|s| post_search_tags(db, s))
+        .collect::<Vec<Vec<DisplayPost>>>();
+    let out = &mut inds[0]
+        .iter()
+        .map(|u| u.clone())
+        .collect::<Vec<DisplayPost>>();
+    for q in inds.iter() {
+        for d in 0..out.len() {
+            if !q.contains(&out[d]) {
+                out.remove(d);
+            }
+        }
+    }
+    out.clone()
 }
 
 pub fn new_post(
