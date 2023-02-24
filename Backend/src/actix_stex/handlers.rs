@@ -483,7 +483,7 @@ pub async fn delete_qa(
 /// Route responds to a get request with struct containing the post corresponding to that id, and all answers to that post.
 /// Res:
 /// {
-/// 	"q": DisplaPost, see above
+/// 	"q": DisplayPost, see above
 /// 	"a": list of DisplayPost, see above
 /// }
 #[get("/qa/{id}")]

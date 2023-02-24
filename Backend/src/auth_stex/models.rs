@@ -19,7 +19,6 @@ impl Config {
         }
     }
 }
-
 pub struct AppState {
     pub pool: crate::Pool,
     pub env: Config,

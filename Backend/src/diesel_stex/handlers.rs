@@ -97,6 +97,7 @@ pub fn post_search_many_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPos
     out.clone()
 }
 
+// User stuff
 pub fn new_post(
     db: &mut PgConnection,
     new: &NewPost,
@@ -176,6 +177,7 @@ pub fn iam(db: &mut PgConnection, idd: &i32) -> Result<DisplayUser, diesel::resu
     users.filter(id.eq(idd)).get_result::<DisplayUser>(db)
 }
 
+// serial type generators
 fn get_next_uid(db: &mut PgConnection) -> i32 {
     use crate::schema::users::dsl::*;
     users
