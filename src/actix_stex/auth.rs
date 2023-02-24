@@ -1,5 +1,5 @@
 use crate::{
-    actix_stex::models::{Account},
+    actix_stex::models::Account,
     auth_stex::jwt_auth::{self, TokenClaims},
     diesel_stex::handlers::{acc_by_unm, dupe_acc, makeme},
     AppState,

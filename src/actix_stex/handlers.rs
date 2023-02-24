@@ -81,6 +81,18 @@ pub async fn get_post_by_tag(
     HttpResponse::Ok().json(post)
 }
 
+/// Post data dump: Provide query thus: "/search/post_owner?q=<tag_list>".
+#[get("/search/post_tags")]
+pub async fn get_post_by_tags(
+    state: web::Data<AppState>,
+    tag: web::Query<AutocParams>,
+    _: JwtMiddleware,
+) -> impl Responder {
+    let db = &state.pool;
+    let post = post_search_many_tags(&mut db.get().unwrap(), &tag.q);
+    HttpResponse::Ok().json(post)
+}
+
 /// Post body requires owner id (same as in path), title, tags and body and date-time optional.
 #[post("{id}/post/new")]
 pub async fn insert_post(
