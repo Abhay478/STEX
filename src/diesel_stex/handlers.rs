@@ -55,19 +55,6 @@ pub fn post_search_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPost> {
         .unwrap()
 }
 
-// pub fn post_search_many_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPost> {
-//     use crate::schema::posts::{dsl::posts, *};
-//     let v: Vec<String> = req.split("<").map(|s| String::from("<") + s).collect();
-//     dbg!(&v);
-//     let x: Vec<Vec<DisplayPost>> = v.iter().map(|tag| posts.filter(tags.similar_to(format!("%{tag}%"))).get_results::<DisplayPost>(db).unwrap()).collect();
-//     // x.iter().map(|vv| vv.iter().collect::<HashSet<DisplayPost>>()).fold(HashSet::new(), |net, x| net.intersection(&x).collect());
-//     let q = x[0].
-//     posts
-//         .filter(tags.similar_to(format!("%{req}%")))
-//         .get_results::<DisplayPost>(db)
-//         .unwrap()
-// }
-
 pub fn post_search_many_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPost> {
     let mut v: Vec<String> = req
         .chars()
