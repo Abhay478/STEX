@@ -11,24 +11,24 @@ pub struct Dummy {
 }
 
 #[derive(Deserialize, Serialize, Queryable, Debug)]
-pub struct AutocParams {
+pub struct Params {
     pub q: String,
 }
 
 #[derive(Deserialize, Serialize, Queryable, Debug)]
-pub struct AutocParamsInt {
+pub struct ParamsInt {
     pub q: i32,
 }
 
 #[derive(Deserialize, Serialize, Queryable, Debug)]
-pub struct AutocParamsAll {
+pub struct ParamsAll {
     pub tag: String, //try and make it &str later // Can't, coz weird lifetime errors.
     pub uid: i32,
     pub title: String,
 }
 
 #[derive(Deserialize, Serialize, Queryable, Debug)]
-pub struct AutocResults {
+pub struct APIResult {
     pub id: i32,
     pub text: String,
 }

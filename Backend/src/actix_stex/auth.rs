@@ -24,6 +24,19 @@ async fn health_checker_handler() -> impl Responder {
 }
 
 /// Provide username and password. Returns username, password and id.
+/// Req: 
+///      {
+///          "username" : "x"
+///          "password" : "x"
+///      }
+/// 
+/// Res: 
+///      {
+///          "id" : <Some number>
+///          "username" : "x"
+///          "password" : some shit
+///      }
+/// 
 #[post("/auth/register")]
 pub async fn register_user_handler(
     mut body: web::Json<Account>,
@@ -59,35 +72,24 @@ pub async fn register_user_handler(
 }
 
 /// Provide username, password and id. Returns token and cookie.
+/// Req: 
+///      {
+///          "username" : "x"
+///          "password" : "x"
+///      }
+/// 
+/// Res: 
+///      {
+///          "status" : "success"
+///          "token" : some shit
+///      }
+/// 
 #[post("/auth/login")]
 pub async fn login_user_handler(
     body: web::Json<Account>,
     data: web::Data<AppState>,
 ) -> impl Responder {
     let db = &mut data.pool.get().unwrap();
-
-    // let query_result = acc_by_id(db, &body.id);
-
-    // match &query_result {
-    //     Ok(user) => {
-    //         let othertemp = body.clone().password.unwrap();
-    //         let temp = user.clone().password.unwrap();
-    //         let parsed_hash = PasswordHash::new(temp.as_str()).unwrap();
-    //         let mut is_valid = Argon2::default()
-    //             .verify_password(othertemp.as_bytes(), &parsed_hash)
-    //             .map_or(false, |_| true);
-
-    //         is_valid = is_valid && user.username == body.username;
-    //         if !is_valid {
-    //             return HttpResponse::BadRequest()
-    //                 .json(json!({"status": "fail", "message": "These are not the droids we are looking for."}));
-    //         }
-    //     }
-    //     Err(_e) => {
-    //         return HttpResponse::BadRequest()
-    //             .json(json!({"status": "fail", "message": "No record."}));
-    //     }
-    // }
 
     let query_result = acc_by_unm(db, &*body.username);
 
@@ -141,6 +143,7 @@ pub async fn login_user_handler(
         .json(json!({"status": "success", "token": token}))
 }
 
+/// No input.
 #[get("/auth/logout")]
 pub async fn logout_handler(_: jwt_auth::JwtMiddleware) -> impl Responder {
     let cookie = Cookie::build("token", "")

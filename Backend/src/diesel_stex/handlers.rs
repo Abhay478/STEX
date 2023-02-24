@@ -12,22 +12,22 @@ pub fn get_all_dnames(db: &mut PgConnection, prefix: &str) -> Vec<User> {
         .unwrap()
 }
 
-pub fn get_all_pnames(db: &mut PgConnection, prefix: &str) -> Vec<AutocResults> {
+pub fn get_all_pnames(db: &mut PgConnection, prefix: &str) -> Vec<APIResult> {
     use crate::schema::posts::{dsl, id, title};
     dsl::posts
         .select((id, title.assume_not_null()))
         .filter(title.is_not_null())
         .filter(title.ilike(format!("{prefix}%")))
-        .load::<AutocResults>(db)
+        .load::<APIResult>(db)
         .unwrap()
 }
 
-pub fn get_all_tagnames(db: &mut PgConnection, prefix: &str) -> Vec<AutocResults> {
+pub fn get_all_tagnames(db: &mut PgConnection, prefix: &str) -> Vec<APIResult> {
     use crate::schema::tags::{dsl, id, tag_name};
     dsl::tags
         .select((id, tag_name))
         .filter(tag_name.ilike(format!("{prefix}%")))
-        .load::<AutocResults>(db)
+        .load::<APIResult>(db)
         .unwrap()
 }
 

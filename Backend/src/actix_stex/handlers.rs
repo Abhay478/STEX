@@ -1,6 +1,6 @@
 use actix_web::{
     delete, get, post,
-    web::{self},
+    web::{self, Json},
     HttpResponse, Responder,
 };
 
@@ -9,11 +9,26 @@ use crate::{
     diesel_stex::{handlers::*, models::*},
 };
 
-/// Autocomplete for users: Provide query thus: "/auto/u?q=<prefix>"
+/// Autocomplete for users: Provide query thus: "/auto/u?q=prefix"
+/// Returns:
+/// [
+///    {
+///        "id": 42166,
+///        "display_name": "abc"
+///    },
+///    {
+///        "id": 56480,
+///        "display_name": "abcd"
+///    },
+///    {
+///        "id": 86837,
+///        "display_name": "ABCD"
+///    }
+/// ]
 #[get("/auto/u")]
 pub async fn get_names(
     state: web::Data<AppState>,
-    prefix: web::Query<AutocParams>,
+    prefix: web::Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -21,11 +36,26 @@ pub async fn get_names(
     HttpResponse::Ok().json(all)
 }
 
-/// Autocomplete for tags: Provide query thus: "/auto/t?q=<prefix>"
+/// Autocomplete for tags: Provide query thus: "/auto/t?q=prefix"
+/// Returns:
+/// [
+///     {
+///        "id": 53,
+///        "text": "actor-model"
+///    },
+///    {
+///        "id": 65,
+///        "text": "agile"
+///    },
+///    {
+///        "id": 82,
+///        "text": "applications"
+///    }
+/// ]
 #[get("/auto/t")]
 pub async fn get_tags(
     state: web::Data<AppState>,
-    prefix: web::Query<AutocParams>,
+    prefix: web::Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -33,11 +63,26 @@ pub async fn get_tags(
     HttpResponse::Ok().json(all)
 }
 
-/// Autocomplete for posts: Provide query thus: "/auto/p?q=<prefix>"
+/// Autocomplete for posts: Provide query thus: "/auto/p?q=prefix"
+/// Returns:
+/// [
+///        {
+///            "id": 44,
+///            "text": "Are certifications worth it?"
+///        },
+///        {
+///            "id": 135,
+///            "text": "As a software engineer, who should I be following on Twitter?"
+///        },
+///        {
+///            "id": 206,
+///            "text": "Are there areas where TDD provides a high ROI and other areas where the ROI is so low that it is not worth following?"
+///        }
+/// ]
 #[get("/auto/p")]
 pub async fn get_posts(
     state: web::Data<AppState>,
-    prefix: web::Query<AutocParams>,
+    prefix: web::Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -45,11 +90,62 @@ pub async fn get_posts(
     HttpResponse::Ok().json(all)
 }
 
-/// Post data dump: Provide query thus: "/search/post_title?q=<title>"
+/// Post data dump: Provide query thus: "/search/post_title?q=title"
+/// Returns:
+/// [
+/// {
+///     "id": 442655,
+///     "owner_user_id": 423932,
+///     "last_editor_user_id": null,
+///     "post_type_id": 0,
+///     "accepted_answer_id": null,
+///     "score": 0,
+///     "parent_id": 442653,
+///     "view_count": null,
+///     "answer_count": 0,
+///     "comment_count": 0,
+///     "owner_display_name": null,
+///     "last_editor_display_name": null,
+///     "title": "Meh1",
+///     "tags": "<meh><answer>",
+///     "content_license": "None",
+///     "body": "Meh2",
+///     "favorite_count": null,
+///     "creation_date": "2023-02-23T07:52:55.502499",
+///     "community_owned_date": null,
+///    "closed_date": null,
+///     "last_edit_date": null,
+///     "last_activity_date": null
+/// },
+/// {
+///     "id": 180531,
+///     "owner_user_id": 33410,
+///     "last_editor_user_id": null,
+///     "post_type_id": 1,
+///     "accepted_answer_id": 180533,
+///     "score": 0,
+///     "parent_id": null,
+///     "view_count": 304,
+///     "answer_count": 1,
+///     "comment_count": 3,
+///     "owner_display_name": null,
+///     "last_editor_display_name": null,
+///     "title": "Did \"Viaweb\" work in the browser without JavaScript and somehow use only Lisp?",
+///     "tags": "<programming-languages><history>",
+///     "content_license": "CC BY-SA 3.0",
+///     "body": "<p>I just read <a href=\"http://www.paulgraham.com/avg.html\" rel=\"nofollow\">Beating the Averages</a>, and Mr. Graham writes that they had a significant advantage over competitors because they used Lisp.</p>\n\n<p>From what I understand, Viaweb was a WYSIWYG editor that ran in the browser for customers to create their own 'stores'. This is obviously inconceivable now to do without JavaScript, yet there is no talk of it at all on this article. Mr. Graham only talks about Lisp and nothing else.</p>\n\n<p>So is (was?) it somehow possible to bypass JavaScript and use Lisp for the front and back ends?</p>\n",
+///     "favorite_count": null,
+///     "creation_date": "2012-12-24T12:11:15.247",
+///     "community_owned_date": null,
+///     "closed_date": null,
+///     "last_edit_date": null,
+///     "last_activity_date": "2012-12-24T13:28:01.150"
+/// }
+/// ]
 #[get("/search/post_title")]
 pub async fn get_post_by_title(
     state: web::Data<AppState>,
-    title: web::Query<AutocParams>,
+    title: web::Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -57,11 +153,61 @@ pub async fn get_post_by_title(
     HttpResponse::Ok().json(post)
 }
 
-/// Post data dump: Provide query thus: "/search/post_owner?q=<owner_user_id>". If not provided, defaults to -1 (Community).
+/// Post data dump: Provide query thus: "/search/post_owner?q=owner_user_id". If not provided, defaults to -1 (Community).
+/// [
+///    {
+///        "id": 67160,
+///        "owner_user_id": -1,
+///        "last_editor_user_id": -1,
+///        "post_type_id": 5,
+///        "accepted_answer_id": null,
+///        "score": 0,
+///        "parent_id": null,
+///        "view_count": null,
+///        "answer_count": null,
+///        "comment_count": 0,
+///        "owner_display_name": null,
+///        "last_editor_display_name": null,
+///        "title": null,
+///        "tags": null,
+///        "content_license": "CC BY-SA 3.0",
+///        "body": null,
+///        "favorite_count": null,
+///        "creation_date": "2011-04-11T13:35:04.670",
+///        "community_owned_date": null,
+///        "closed_date": null,
+///        "last_edit_date": "2011-04-11T13:35:04.670",
+///        "last_activity_date": "2011-04-11T13:35:04.670"
+///    },
+///    {
+///        "id": 1462,
+///        "owner_user_id": -1,
+///        "last_editor_user_id": 25936,
+///        "post_type_id": 7,
+///        "accepted_answer_id": null,
+///        "score": 0,
+///        "parent_id": null,
+///        "view_count": null,
+///        "answer_count": null,
+///        "comment_count": 0,
+///        "owner_display_name": null,
+///        "last_editor_display_name": null,
+///        "title": null,
+///        "tags": null,
+///        "content_license": "CC BY-SA 3.0",
+///        "body": "<p>Programmers — Stack Exchange is a site for professional programmers who are interested in getting expert answers on conceptual questions about software development. If you have a question about...</p>\n\n<ul>\n<li>algorithm and data structure concepts</li>\n<li>design patterns</li>\n<li>developer testing</li>\n<li>development methodologies</li>\n<li>freelancing and business concerns</li>\n<li>quality assurance</li>\n<li>software architecture</li>\n<li>software engineering</li>\n<li>software licensing</li>\n</ul>\n\n<p>and it is <strong>not about</strong>...</p>\n\n<ul>\n<li>general workplace issues, office politics, résumé help (check out <a href=\"http://workplace.stackexchange.com/\">The Workplace</a> instead),</li>\n<li>implementation issues or programming tools (ask on <a href=\"http://www.stackoverflow.com/\">Stack Overflow</a> instead),</li>\n<li>what language/technology you should learn next, including <a href=\"http://blog.stackoverflow.com/2011/08/gorilla-vs-shark/\">which technology is better</a>,</li>\n<li>what project you should do next,</li>\n<li>what book you should read next,</li>\n<li><a href=\"http://meta.programmers.stackexchange.com/questions/588/are-career-advice-questions-useful-to-anyone-except-the-poster/590#590\">career advice</a>, salary or compensation,</li>\n<li>personal lifestyle, including relationships, and non-programming activities</li>\n</ul>\n\n<p>...then you're in the right place to ask your question!</p>\n\n<p>Please make sure your question uniquely applies to programmers in general:</p>\n\n<p><img src=\"https://i.stack.imgur.com/ociNc.png\" alt=\"proper scope for question\"></p>\n\n<h2>What about subjective questions?</h2>\n\n<p>Subjective questions are allowed, but subjective does not mean &ldquo;anything goes&rdquo;. <strong>Please keep it professional at all times</strong>. If this is a question you'd be uncomfortable discussing with your colleagues in a work environment, it's probably not appropriate here, either.</p>\n\n<p>All subjective questions are expected to be <em>constructive</em>. How do we define that?  Constructive subjective questions &hellip;</p>\n\n<ul>\n<li>inspire answers that explain “why” and “how”.</li>\n<li>tend to have long, not short, answers.</li>\n<li>have a constructive, fair, and impartial tone.</li>\n<li>invite sharing experiences over opinions.</li>\n<li>insist that opinion be backed up with facts and references.</li>\n<li>are more than just mindless social fun.</li>\n</ul>\n\n<p>Questions that do not meet enough of these six guidelines will be closed as \"Not Constructive\". Please see the <a href=\"http://blog.stackoverflow.com/2010/09/good-subjective-bad-subjective\">Good Subjective, Bad Subjective</a> and <a href=\"http://blog.stackoverflow.com/2011/01/real-questions-have-answers/\">Real Questions Have Answers</a> blog posts for more details and examples.</p>\n",
+///        "favorite_count": null,
+///        "creation_date": "2010-09-08T22:37:51.210",
+///        "community_owned_date": "2011-07-05T10:09:01.537",
+///        "closed_date": null,
+///        "last_edit_date": "2013-03-02T06:31:46.033",
+///        "last_activity_date": "2013-03-02T06:31:46.033"
+///    }
+/// ]
 #[get("/search/post_owner")]
 pub async fn get_post_by_owner(
     state: web::Data<AppState>,
-    oid: web::Query<AutocParams>,
+    oid: web::Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -70,10 +216,11 @@ pub async fn get_post_by_owner(
 }
 
 /// Post data dump: Provide query thus: "/search/post_owner?q=<tag_name>".
+/// Looks just like the other two.
 #[get("/search/post_tag")]
 pub async fn get_post_by_tag(
     state: web::Data<AppState>,
-    tag: web::Query<AutocParams>,
+    tag: web::Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -81,11 +228,12 @@ pub async fn get_post_by_tag(
     HttpResponse::Ok().json(post)
 }
 
-/// Post data dump: Provide query thus: "/search/post_owner?q=<tag_list>".
+/// Post data dump: Provide query thus: "/search/post_owner?q=<tag_name1><tag_name2>".
+/// Looks just like the other two.
 #[get("/search/post_tags")]
 pub async fn get_post_by_tags(
     state: web::Data<AppState>,
-    tag: web::Query<AutocParams>,
+    tag: web::Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -94,6 +242,37 @@ pub async fn get_post_by_tags(
 }
 
 /// Post body requires owner id (same as in path), title, tags and body and date-time optional.
+/// Req:
+/// {
+/// 	"title": "Meh1",
+/// 	"tags": "<meh><answer>",
+/// 	"body": "Meh2"
+/// }
+/// Res: DisplayPost, looks like
+/// {
+///     "id": 180531,
+///     "owner_user_id": 33410,
+///     "last_editor_user_id": null,
+///     "post_type_id": 1,
+///     "accepted_answer_id": 180533,
+///     "score": 0,
+///     "parent_id": null,
+///     "view_count": 304,
+///     "answer_count": 1,
+///     "comment_count": 3,
+///     "owner_display_name": null,
+///     "last_editor_display_name": null,
+///     "title": "Did \"Viaweb\" work in the browser without JavaScript and somehow use only Lisp?",
+///     "tags": "<programming-languages><history>",
+///     "content_license": "CC BY-SA 3.0",
+///     "body": "<p>I just read <a href=\"http://www.paulgraham.com/avg.html\" rel=\"nofollow\">Beating the Averages</a>, and Mr. Graham writes that they had a significant advantage over competitors because they used Lisp.</p>\n\n<p>From what I understand, Viaweb was a WYSIWYG editor that ran in the browser for customers to create their own 'stores'. This is obviously inconceivable now to do without JavaScript, yet there is no talk of it at all on this article. Mr. Graham only talks about Lisp and nothing else.</p>\n\n<p>So is (was?) it somehow possible to bypass JavaScript and use Lisp for the front and back ends?</p>\n",
+///     "favorite_count": null,
+///     "creation_date": "2012-12-24T12:11:15.247",
+///     "community_owned_date": null,
+///     "closed_date": null,
+///     "last_edit_date": null,
+///     "last_activity_date": "2012-12-24T13:28:01.150"
+/// }
 #[post("{id}/post/new")]
 pub async fn insert_post(
     state: web::Data<AppState>,
@@ -110,6 +289,38 @@ pub async fn insert_post(
 }
 
 /// Post body requires owner id (same as in path), title, tags and body and parent post (question) id.
+/// Req:
+/// {
+/// 	"title": "Meh1",
+/// 	"tags": "<meh><answer>",
+/// 	"body": "Meh2",
+/// 	"parent_id": 442653
+/// }
+/// Res: DisplayPost, looks like
+/// {
+///     "id": 180531,
+///     "owner_user_id": 33410,
+///     "last_editor_user_id": null,
+///     "post_type_id": 1,
+///     "accepted_answer_id": 180533,
+///     "score": 0,
+///     "parent_id": null,
+///     "view_count": 304,
+///     "answer_count": 1,
+///     "comment_count": 3,
+///     "owner_display_name": null,
+///     "last_editor_display_name": null,
+///     "title": "Did \"Viaweb\" work in the browser without JavaScript and somehow use only Lisp?",
+///     "tags": "<programming-languages><history>",
+///     "content_license": "CC BY-SA 3.0",
+///     "body": "<p>I just read <a href=\"http://www.paulgraham.com/avg.html\" rel=\"nofollow\">Beating the Averages</a>, and Mr. Graham writes that they had a significant advantage over competitors because they used Lisp.</p>\n\n<p>From what I understand, Viaweb was a WYSIWYG editor that ran in the browser for customers to create their own 'stores'. This is obviously inconceivable now to do without JavaScript, yet there is no talk of it at all on this article. Mr. Graham only talks about Lisp and nothing else.</p>\n\n<p>So is (was?) it somehow possible to bypass JavaScript and use Lisp for the front and back ends?</p>\n",
+///     "favorite_count": null,
+///     "creation_date": "2012-12-24T12:11:15.247",
+///     "community_owned_date": null,
+///     "closed_date": null,
+///     "last_edit_date": null,
+///     "last_activity_date": "2012-12-24T13:28:01.150"
+/// }
 #[post("{id}/post/answer")]
 pub async fn answer_to_post(
     state: web::Data<AppState>,
@@ -126,6 +337,39 @@ pub async fn answer_to_post(
 }
 
 /// Post body requires post id (not same as in path), title, tags and body.
+/// Req: 
+/// {
+/// 	"id": 442656,
+///    "title": "Meh-updated",
+///    "tags": "<meh><answer><update>",
+///    "body": "Meh2 Updated"
+/// }
+/// 
+/// Res: DisplayPost, looks like
+/// {
+///     "id": 180531,
+///     "owner_user_id": 33410,
+///     "last_editor_user_id": null,
+///     "post_type_id": 1,
+///     "accepted_answer_id": 180533,
+///     "score": 0,
+///     "parent_id": null,
+///     "view_count": 304,
+///     "answer_count": 1,
+///     "comment_count": 3,
+///     "owner_display_name": null,
+///     "last_editor_display_name": null,
+///     "title": "Did \"Viaweb\" work in the browser without JavaScript and somehow use only Lisp?",
+///     "tags": "<programming-languages><history>",
+///     "content_license": "CC BY-SA 3.0",
+///     "body": "<p>I just read <a href=\"http://www.paulgraham.com/avg.html\" rel=\"nofollow\">Beating the Averages</a>, and Mr. Graham writes that they had a significant advantage over competitors because they used Lisp.</p>\n\n<p>From what I understand, Viaweb was a WYSIWYG editor that ran in the browser for customers to create their own 'stores'. This is obviously inconceivable now to do without JavaScript, yet there is no talk of it at all on this article. Mr. Graham only talks about Lisp and nothing else.</p>\n\n<p>So is (was?) it somehow possible to bypass JavaScript and use Lisp for the front and back ends?</p>\n",
+///     "favorite_count": null,
+///     "creation_date": "2012-12-24T12:11:15.247",
+///     "community_owned_date": null,
+///     "closed_date": null,
+///     "last_edit_date": null,
+///     "last_activity_date": "2012-12-24T13:28:01.150"
+/// }
 #[post("{id}/post/update")]
 pub async fn update_post(
     state: web::Data<AppState>,
@@ -145,10 +389,35 @@ pub async fn update_post(
 }
 
 /// Query parameter thus: "{id}/post/delete/q=<id>"
+/// Res: DisplayPost, looks like
+/// {
+///     "id": 180531,
+///     "owner_user_id": 33410,
+///     "last_editor_user_id": null,
+///     "post_type_id": 1,
+///     "accepted_answer_id": 180533,
+///     "score": 0,
+///     "parent_id": null,
+///     "view_count": 304,
+///     "answer_count": 1,
+///     "comment_count": 3,
+///     "owner_display_name": null,
+///     "last_editor_display_name": null,
+///     "title": "Did \"Viaweb\" work in the browser without JavaScript and somehow use only Lisp?",
+///     "tags": "<programming-languages><history>",
+///     "content_license": "CC BY-SA 3.0",
+///     "body": "<p>I just read <a href=\"http://www.paulgraham.com/avg.html\" rel=\"nofollow\">Beating the Averages</a>, and Mr. Graham writes that they had a significant advantage over competitors because they used Lisp.</p>\n\n<p>From what I understand, Viaweb was a WYSIWYG editor that ran in the browser for customers to create their own 'stores'. This is obviously inconceivable now to do without JavaScript, yet there is no talk of it at all on this article. Mr. Graham only talks about Lisp and nothing else.</p>\n\n<p>So is (was?) it somehow possible to bypass JavaScript and use Lisp for the front and back ends?</p>\n",
+///     "favorite_count": null,
+///     "creation_date": "2012-12-24T12:11:15.247",
+///     "community_owned_date": null,
+///     "closed_date": null,
+///     "last_edit_date": null,
+///     "last_activity_date": "2012-12-24T13:28:01.150"
+/// }
 #[delete("{id}/post/delete")]
 pub async fn delete_post(
     state: web::Data<AppState>,
-    kill: web::Query<AutocParamsInt>,
+    kill: web::Query<ParamsInt>,
     idd: web::Path<i32>,
     me: JwtMiddleware,
 ) -> impl Responder {
@@ -164,6 +433,11 @@ pub async fn delete_post(
 }
 
 /// Route responds to a get request with struct containing the post corresponding to that id, and all answers to that post.
+/// Res: 
+/// {
+/// 	"q": DisplaPost, see above
+/// 	"a": list of DisplayPost, see above
+/// }
 #[get("/question/{id}")]
 pub async fn get_question(
     state: web::Data<AppState>,
@@ -185,22 +459,48 @@ pub async fn get_question(
     }
 }
 
+/// Returns profile
+/// Res: 
+/// {
+/// 	"id": 423932,
+/// 	"account_id": null,
+/// 	"reputation": 0,
+/// 	"views": 0,
+/// 	"down_votes": 0,
+/// 	"up_votes": 0,
+/// 	"display_name": "x",
+/// 	"location": null,
+/// 	"profile_image_url": null,
+/// 	"website_url": null,
+/// 	"about_me": "abcde",
+/// 	"creation_date": "2023-02-23T03:47:24.916123",
+/// 	"last_access_date": "2023-02-23T03:47:24.916123"
+/// }
 #[get("/me")]
 pub async fn whoami(state: web::Data<AppState>, me: JwtMiddleware) -> impl Responder {
     let db = &state.pool;
-    // let me = ;
-    // match me {
-    //     Ok(q) => {
-    //         // let out = Page {q, a: all_answers(&mut db.get().unwrap(), &id).unwrap()};
-    //         HttpResponse::Ok().json(q)
-    //     }
-    //     Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),
-    // }
-
-    HttpResponse::Ok().json(iam(&mut db.get().unwrap(), &me.user_id.parse().unwrap()).unwrap())
+	let I = iam(&mut db.get().unwrap(), &me.user_id.parse().unwrap()).unwrap();
+    HttpResponse::Ok().json(I)
 }
 
-// to update about_me
+/// to update about_me
+/// Req: String (Not a json)
+/// Res:
+/// {
+/// 	"id": 423932,
+/// 	"account_id": null,
+/// 	"reputation": 0,
+/// 	"views": 0,
+/// 	"down_votes": 0,
+/// 	"up_votes": 0,
+/// 	"display_name": "x",
+/// 	"location": null,
+/// 	"profile_image_url": null,
+/// 	"website_url": null,
+/// 	"about_me": "abcde",
+/// 	"creation_date": "2023-02-23T03:47:24.916123",
+/// 	"last_access_date": "2023-02-23T03:47:24.916123"
+/// }
 #[post("/{id}/bio")]
 pub async fn bio(state: web::Data<AppState>, id: web::Path<i32>, new: String) -> impl Responder {
     let db = &state.pool;
