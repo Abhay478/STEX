@@ -1,4 +1,2 @@
-target
-.DS_Store
-src/not-bin
-.env
+**/.DS_Store
+**/.env
