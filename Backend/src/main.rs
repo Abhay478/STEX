@@ -10,6 +10,7 @@ use actix_stex::auth::*;
 use actix_stex::handlers::*;
 use auth_stex::models::{AppState, Config};
 use diesel::{r2d2::ConnectionManager, PgConnection};
+// use log::{debug, error, log_enabled, info, Level};
 
 type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
@@ -17,6 +18,8 @@ fn before() {
     if std::env::var_os("RUST_LOG").is_none() {
         std::env::set_var("RUST_LOG", "debug");
     }
+
+    env_logger::init();
 }
 
 fn corses() -> Cors {
