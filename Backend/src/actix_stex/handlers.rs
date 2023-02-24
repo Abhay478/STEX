@@ -10,7 +10,7 @@ use crate::{
 };
 
 /// Autocomplete for users: Provide query thus: "/auto/u?q=prefix"
-/// Returns:
+/// Res:
 /// [
 ///    {
 ///        "id": 42166,
@@ -37,7 +37,7 @@ pub async fn get_names(
 }
 
 /// Autocomplete for tags: Provide query thus: "/auto/t?q=prefix"
-/// Returns:
+/// Res:
 /// [
 ///     {
 ///        "id": 53,
@@ -64,7 +64,7 @@ pub async fn get_tags(
 }
 
 /// Autocomplete for posts: Provide query thus: "/auto/p?q=prefix"
-/// Returns:
+/// Res:
 /// [
 ///        {
 ///            "id": 44,
@@ -91,7 +91,7 @@ pub async fn get_qa(
 }
 
 /// Post data dump: Provide query thus: "/search/title?q=title"
-/// Returns:
+/// Res:
 /// [
 /// {
 ///     "id": 442655,
@@ -153,7 +153,7 @@ pub async fn get_question_by_title(
     HttpResponse::Ok().json(post)
 }
 
-/// Post data dump: Provide query thus: "/search/owner/question?q=owner_user_id". If not provided, defaults to -1 (Community).
+/// Res:
 /// [
 ///    {
 ///        "id": 67160,
@@ -204,18 +204,18 @@ pub async fn get_question_by_title(
 ///        "last_activity_date": "2013-03-02T06:31:46.033"
 ///    }
 /// ]
-#[get("/search/owner/question")]
+#[get("/user/{id}/questions")]
 pub async fn get_questions_by_owner(
     state: Data<AppState>,
-    oid: Query<Params>,
+    oid: Path<i32>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = question_search_owner(&mut db.get().unwrap(), oid.q.parse().unwrap_or(-1));
+    let post = question_search_owner(&mut db.get().unwrap(), &oid);
     HttpResponse::Ok().json(post)
 }
 
-/// Post data dump: Provide query thus: "/search/owner/answer?q=owner_user_id". If not provided, defaults to -1 (Community).
+/// Res:
 /// [
 ///    {
 ///        "id": 67160,
@@ -266,17 +266,16 @@ pub async fn get_questions_by_owner(
 ///        "last_activity_date": "2013-03-02T06:31:46.033"
 ///    }
 /// ]
-#[get("/search/owner/answer")]
+#[get("/user/{id}/answers")]
 pub async fn get_answers_by_owner(
     state: Data<AppState>,
-    oid: Query<Params>,
+    oid: Path<i32>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = answer_search_owner(&mut db.get().unwrap(), oid.q.parse().unwrap_or(-1));
+    let post = answer_search_owner(&mut db.get().unwrap(), &oid);
     HttpResponse::Ok().json(post)
 }
-
 
 /// Post data dump: Provide query thus: "/search/tag?q=<tag_name>".
 /// Looks just like the other two.

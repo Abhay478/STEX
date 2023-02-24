@@ -42,7 +42,7 @@ pub fn post_search_title(db: &mut PgConnection, req: &str) -> Vec<DisplayPost> {
         .unwrap()
 }
 
-pub fn question_search_owner(db: &mut PgConnection, req: i32) -> Vec<DisplayPost> {
+pub fn question_search_owner(db: &mut PgConnection, req: &i32) -> Vec<DisplayPost> {
     use crate::schema::posts::*;
     dsl::posts
         .filter(owner_user_id.eq(req))
@@ -51,7 +51,7 @@ pub fn question_search_owner(db: &mut PgConnection, req: i32) -> Vec<DisplayPost
         .unwrap()
 }
 
-pub fn answer_search_owner(db: &mut PgConnection, req: i32) -> Vec<DisplayPost> {
+pub fn answer_search_owner(db: &mut PgConnection, req: &i32) -> Vec<DisplayPost> {
     use crate::schema::posts::*;
     dsl::posts
         .filter(owner_user_id.eq(req))
@@ -59,7 +59,6 @@ pub fn answer_search_owner(db: &mut PgConnection, req: i32) -> Vec<DisplayPost> 
         .get_results::<DisplayPost>(db)
         .unwrap()
 }
-
 
 pub fn post_search_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPost> {
     use crate::schema::posts::{dsl::posts, *};
