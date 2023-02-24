@@ -75,7 +75,6 @@ pub fn post_search_many_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPos
     let s = v
         .iter()
         .fold(String::from("%"), |net, tag| net + tag.as_str() + "%");
-    dbg!(&v);
 
     posts
         .filter(tags.similar_to(s))
