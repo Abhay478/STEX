@@ -14,7 +14,7 @@ use crate::{
 pub async fn get_names(
     state: web::Data<AppState>,
     prefix: web::Query<AutocParams>,
-    _: JwtMiddleware,
+    // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
     let all = get_all_dnames(&mut db.get().unwrap(), &prefix.q);
@@ -26,7 +26,7 @@ pub async fn get_names(
 pub async fn get_tags(
     state: web::Data<AppState>,
     prefix: web::Query<AutocParams>,
-    _: JwtMiddleware,
+    // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
     let all = get_all_tagnames(&mut db.get().unwrap(), &prefix.q);
@@ -38,7 +38,7 @@ pub async fn get_tags(
 pub async fn get_posts(
     state: web::Data<AppState>,
     prefix: web::Query<AutocParams>,
-    _: JwtMiddleware,
+    // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
     let all = get_all_pnames(&mut db.get().unwrap(), &prefix.q);
@@ -50,7 +50,7 @@ pub async fn get_posts(
 pub async fn get_post_by_title(
     state: web::Data<AppState>,
     title: web::Query<AutocParams>,
-    _: JwtMiddleware,
+    // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
     let post = post_search_title(&mut db.get().unwrap(), &title.q);
@@ -62,7 +62,7 @@ pub async fn get_post_by_title(
 pub async fn get_post_by_owner(
     state: web::Data<AppState>,
     oid: web::Query<AutocParams>,
-    _: JwtMiddleware,
+    // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
     let post = post_search_owner(&mut db.get().unwrap(), oid.q.parse().unwrap_or(-1));
@@ -74,7 +74,7 @@ pub async fn get_post_by_owner(
 pub async fn get_post_by_tag(
     state: web::Data<AppState>,
     tag: web::Query<AutocParams>,
-    _: JwtMiddleware,
+    // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
     let post = post_search_tags(&mut db.get().unwrap(), &tag.q);
@@ -86,7 +86,7 @@ pub async fn get_post_by_tag(
 pub async fn get_post_by_tags(
     state: web::Data<AppState>,
     tag: web::Query<AutocParams>,
-    _: JwtMiddleware,
+    // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
     let post = post_search_many_tags(&mut db.get().unwrap(), &tag.q);

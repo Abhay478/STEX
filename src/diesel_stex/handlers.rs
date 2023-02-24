@@ -7,7 +7,7 @@ pub fn get_all_dnames(db: &mut PgConnection, prefix: &str) -> Vec<User> {
     use crate::schema::users::{display_name, dsl, id};
     dsl::users
         .select((id, display_name))
-        .filter(display_name.like(format!("%{prefix}%")))
+        .filter(display_name.ilike(format!("{prefix}%")))
         .load::<User>(db)
         .unwrap()
 }
@@ -17,7 +17,7 @@ pub fn get_all_pnames(db: &mut PgConnection, prefix: &str) -> Vec<AutocResults> 
     dsl::posts
         .select((id, title.assume_not_null()))
         .filter(title.is_not_null())
-        .filter(title.like(format!("%{prefix}%")))
+        .filter(title.ilike(format!("{prefix}%")))
         .load::<AutocResults>(db)
         .unwrap()
 }
@@ -26,7 +26,7 @@ pub fn get_all_tagnames(db: &mut PgConnection, prefix: &str) -> Vec<AutocResults
     use crate::schema::tags::{dsl, id, tag_name};
     dsl::tags
         .select((id, tag_name))
-        .filter(tag_name.like(format!("%{prefix}%")))
+        .filter(tag_name.ilike(format!("{prefix}%")))
         .load::<AutocResults>(db)
         .unwrap()
 }
@@ -34,7 +34,7 @@ pub fn get_all_tagnames(db: &mut PgConnection, prefix: &str) -> Vec<AutocResults
 pub fn post_search_title(db: &mut PgConnection, req: &str) -> Vec<DisplayPost> {
     use crate::schema::posts::*;
     dsl::posts
-        .filter(title.eq(req))
+        .filter(title.ilike(format!("%{req}%")))
         .get_results::<DisplayPost>(db)
         .unwrap()
 }
@@ -50,7 +50,7 @@ pub fn post_search_owner(db: &mut PgConnection, req: i32) -> Vec<DisplayPost> {
 pub fn post_search_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPost> {
     use crate::schema::posts::{dsl::posts, *};
     posts
-        .filter(tags.like(format!("%{req}%")))
+        .filter(tags.ilike(format!("%{req}%")))
         .get_results::<DisplayPost>(db)
         .unwrap()
 }
@@ -77,7 +77,7 @@ pub fn post_search_many_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPos
         .fold(String::from("%"), |net, tag| net + tag.as_str() + "%");
 
     posts
-        .filter(tags.similar_to(s))
+        .filter(tags.ilike(s))
         .get_results::<DisplayPost>(db)
         .unwrap()
 }
