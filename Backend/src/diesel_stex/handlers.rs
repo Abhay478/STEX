@@ -104,7 +104,7 @@ pub fn answer(
     db: &mut PgConnection,
     new: &AnswerPost,
     oid: &i32,
-    par_id: &i32
+    par_id: &i32,
 ) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
     diesel::insert_into(posts)

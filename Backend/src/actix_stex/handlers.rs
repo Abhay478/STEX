@@ -321,7 +321,7 @@ pub async fn ask_question(
 pub async fn give_answer(
     state: Data<AppState>,
     new: Json<AnswerPost>,
-	par: Path<i32>,
+    par: Path<i32>,
     me: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -368,7 +368,7 @@ pub async fn give_answer(
 pub async fn rephrase_qa(
     state: Data<AppState>,
     new: Json<OldPost>,
-	id: Path<i32>,
+    id: Path<i32>,
     me: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -425,7 +425,7 @@ pub async fn delete_qa(
 /// 	"a": list of DisplayPost, see above
 /// }
 #[get("/qa/{id}")]
-pub async fn get_page (
+pub async fn get_page(
     state: Data<AppState>,
     id: Path<i32>,
     // _: JwtMiddleware,
