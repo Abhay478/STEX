@@ -165,7 +165,11 @@ pub async fn delete_post(
 
 /// Route responds to a get request with struct containing the post corresponding to that id, and all answers to that post.
 #[get("/question/{id}")]
-pub async fn get_question(state: web::Data<AppState>, id: web::Path<i32>) -> impl Responder {
+pub async fn get_question(
+    state: web::Data<AppState>,
+    id: web::Path<i32>,
+    // _: JwtMiddleware,
+) -> impl Responder {
     use crate::actix_stex::models::Page;
     let db = &state.pool;
     let qn = get_post_by_id(&mut db.get().unwrap(), &id);
