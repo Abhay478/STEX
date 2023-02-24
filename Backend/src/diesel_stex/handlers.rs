@@ -104,6 +104,7 @@ pub fn answer(
     db: &mut PgConnection,
     new: &AnswerPost,
     oid: &i32,
+    par_id: &i32
 ) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
     diesel::insert_into(posts)
@@ -111,6 +112,7 @@ pub fn answer(
             new,
             owner_user_id.eq(oid),
             id.eq(&get_next_pid(db)),
+            parent_id.eq(par_id),
             creation_date.eq(chrono::offset::Local::now().naive_utc()),
         ))
         .get_result(db)
@@ -119,10 +121,11 @@ pub fn answer(
 pub fn update(
     db: &mut PgConnection,
     new: &OldPost,
+    it: &i32,
     me: &i32,
 ) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
-    diesel::update(posts.filter(owner_user_id.eq(me)).filter(id.eq(new.id)))
+    diesel::update(posts.filter(owner_user_id.eq(me)).filter(id.eq(it)))
         .set((tags.eq(&new.tags), body.eq(&new.body), title.eq(&new.title)))
         .get_result(db)
 }

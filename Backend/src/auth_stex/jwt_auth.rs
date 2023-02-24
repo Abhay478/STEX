@@ -28,7 +28,7 @@ impl fmt::Display for ErrorResponse {
 }
 
 pub struct JwtMiddleware {
-    pub user_id: String,
+    pub user_id: i32,
 }
 
 impl FromRequest for JwtMiddleware {
@@ -73,7 +73,7 @@ impl FromRequest for JwtMiddleware {
         req.extensions_mut().insert::<String>(user_id.to_owned());
 
         ready(Ok(JwtMiddleware {
-            user_id: user_id.to_string(),
+            user_id: user_id.to_string().parse().unwrap(),
         }))
     }
 }

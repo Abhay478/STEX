@@ -128,7 +128,7 @@ pub struct NewPost {
 #[derive(Insertable, Serialize, Deserialize)]
 #[diesel(table_name = posts)]
 pub struct OldPost {
-    pub id: i32,
+    // pub id: i32,
     pub title: String,
     pub tags: String,
     pub body: String,
@@ -141,7 +141,7 @@ pub struct AnswerPost {
     pub title: String,
     pub tags: String,
     pub body: String,
-    pub parent_id: i32, // the important one
+    // pub parent_id: i32, // the important one
 }
 
 // #[derive(Insertable)]

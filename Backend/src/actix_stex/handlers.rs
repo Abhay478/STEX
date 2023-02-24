@@ -80,7 +80,7 @@ pub async fn get_tags(
 ///        }
 /// ]
 #[get("/auto/p")]
-pub async fn get_posts(
+pub async fn get_qa(
     state: Data<AppState>,
     prefix: Query<Params>,
     // _: JwtMiddleware,
@@ -142,8 +142,8 @@ pub async fn get_posts(
 ///     "last_activity_date": "2012-12-24T13:28:01.150"
 /// }
 /// ]
-#[get("/search/post_title")]
-pub async fn get_post_by_title(
+#[get("/search/title")]
+pub async fn get_question_by_title(
     state: Data<AppState>,
     title: Query<Params>,
     // _: JwtMiddleware,
@@ -204,8 +204,8 @@ pub async fn get_post_by_title(
 ///        "last_activity_date": "2013-03-02T06:31:46.033"
 ///    }
 /// ]
-#[get("/search/post_owner")]
-pub async fn get_post_by_owner(
+#[get("/search/owner")]
+pub async fn get_qa_by_owner(
     state: Data<AppState>,
     oid: Query<Params>,
     // _: JwtMiddleware,
@@ -217,8 +217,8 @@ pub async fn get_post_by_owner(
 
 /// Post data dump: Provide query thus: "/search/post_owner?q=<tag_name>".
 /// Looks just like the other two.
-#[get("/search/post_tag")]
-pub async fn get_post_by_tag(
+#[get("/search/tag")]
+pub async fn get_qa_by_tag(
     state: Data<AppState>,
     tag: Query<Params>,
     // _: JwtMiddleware,
@@ -230,8 +230,8 @@ pub async fn get_post_by_tag(
 
 /// Post data dump: Provide query thus: "/search/post_owner?q=<tag_name1><tag_name2>".
 /// Looks just like the other two.
-#[get("/search/post_tags")]
-pub async fn get_post_by_tags(
+#[get("/search/tags")]
+pub async fn get_qa_by_tags(
     state: Data<AppState>,
     tag: Query<Params>,
     // _: JwtMiddleware,
@@ -241,7 +241,6 @@ pub async fn get_post_by_tags(
     HttpResponse::Ok().json(post)
 }
 
-/// Post body requires owner id (same as in path), title, tags and body and date-time optional.
 /// Req:
 /// {
 /// 	"title": "Meh1",
@@ -273,28 +272,25 @@ pub async fn get_post_by_tags(
 ///     "last_edit_date": null,
 ///     "last_activity_date": "2012-12-24T13:28:01.150"
 /// }
-#[post("{id}/post/new")]
-pub async fn insert_post(
+#[post("/qa/question")]
+pub async fn ask_question(
     state: Data<AppState>,
     mut new: Json<NewPost>,
-    idd: Path<i32>,
-    _: JwtMiddleware,
+    me: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = new_post(&mut db.get().unwrap(), &mut new.0, &idd);
+    let post = new_post(&mut db.get().unwrap(), &mut new.0, &me.user_id);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::Ok().json(format!("Can't do that: {}.", e.to_string())),
     }
 }
 
-/// Post body requires owner id (same as in path), title, tags and body and parent post (question) id.
 /// Req:
 /// {
 /// 	"title": "Meh1",
 /// 	"tags": "<meh><answer>",
 /// 	"body": "Meh2",
-/// 	"parent_id": 442653
 /// }
 /// Res: DisplayPost, looks like
 /// {
@@ -321,28 +317,26 @@ pub async fn insert_post(
 ///     "last_edit_date": null,
 ///     "last_activity_date": "2012-12-24T13:28:01.150"
 /// }
-#[post("{id}/post/answer")]
-pub async fn answer_to_post(
+#[post("/qa/{id}/answer")]
+pub async fn give_answer(
     state: Data<AppState>,
     new: Json<AnswerPost>,
-    idd: Path<i32>,
-    _: JwtMiddleware,
+	par: Path<i32>,
+    me: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = answer(&mut db.get().unwrap(), &new.0, &idd);
+    let post = answer(&mut db.get().unwrap(), &new.0, &me.user_id, &par);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::Ok().json(format!("Can't do that: {}.", e.to_string())),
     }
 }
 
-/// Post body requires post id (not same as in path), title, tags and body.
 /// Req:
 /// {
-/// 	"id": 442656,
-///    "title": "Meh-updated",
-///    "tags": "<meh><answer><update>",
-///    "body": "Meh2 Updated"
+///     "title": "Meh-updated",
+///     "tags": "<meh><answer><update>",
+///     "body": "Meh2 Updated"
 /// }
 ///
 /// Res: DisplayPost, looks like
@@ -370,25 +364,21 @@ pub async fn answer_to_post(
 ///     "last_edit_date": null,
 ///     "last_activity_date": "2012-12-24T13:28:01.150"
 /// }
-#[post("{id}/post/update")]
-pub async fn update_post(
+#[post("/qa/{id}/update")]
+pub async fn rephrase_qa(
     state: Data<AppState>,
     new: Json<OldPost>,
-    idd: Path<i32>,
+	id: Path<i32>,
     me: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    if me.user_id != idd.to_string() {
-        return HttpResponse::BadRequest().body("Invalid creds.");
-    }
-    let post = update(&mut db.get().unwrap(), &new.0, &idd);
+    let post = update(&mut db.get().unwrap(), &new.0, &me.user_id, &id);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),
     }
 }
 
-/// Query parameter thus: "{id}/post/delete/q=<id>"
 /// Res: DisplayPost, looks like
 /// {
 ///     "id": 180531,
@@ -414,18 +404,14 @@ pub async fn update_post(
 ///     "last_edit_date": null,
 ///     "last_activity_date": "2012-12-24T13:28:01.150"
 /// }
-#[delete("{id}/post/delete")]
-pub async fn delete_post(
+#[delete("/qa/{id}/delete")]
+pub async fn delete_qa(
     state: Data<AppState>,
-    kill: Query<ParamsInt>,
-    idd: Path<i32>,
+    kill: Path<i32>,
     me: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    if me.user_id != idd.to_string() {
-        return HttpResponse::BadRequest().body("Invalid creds.");
-    }
-    let post = delete(&mut db.get().unwrap(), &kill.q, &idd);
+    let post = delete(&mut db.get().unwrap(), &kill, &me.user_id);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),
@@ -438,8 +424,8 @@ pub async fn delete_post(
 /// 	"q": DisplaPost, see above
 /// 	"a": list of DisplayPost, see above
 /// }
-#[get("/question/{id}")]
-pub async fn get_question(
+#[get("/qa/{id}")]
+pub async fn get_page (
     state: Data<AppState>,
     id: Path<i32>,
     // _: JwtMiddleware,
@@ -479,7 +465,7 @@ pub async fn get_question(
 #[get("/me")]
 pub async fn whoami(state: Data<AppState>, me: JwtMiddleware) -> impl Responder {
     let db = &state.pool;
-    let I = iam(&mut db.get().unwrap(), &me.user_id.parse().unwrap()).unwrap();
+    let I = iam(&mut db.get().unwrap(), &me.user_id).unwrap();
     HttpResponse::Ok().json(I)
 }
 
@@ -501,10 +487,10 @@ pub async fn whoami(state: Data<AppState>, me: JwtMiddleware) -> impl Responder 
 /// 	"creation_date": "2023-02-23T03:47:24.916123",
 /// 	"last_access_date": "2023-02-23T03:47:24.916123"
 /// }
-#[post("/{id}/bio")]
-pub async fn bio(state: Data<AppState>, id: Path<i32>, new: String) -> impl Responder {
+#[post("/bio")]
+pub async fn bio(state: Data<AppState>, new: String, me: JwtMiddleware) -> impl Responder {
     let db = &state.pool;
-    let res = make_bio(&mut db.get().unwrap(), &new, &id);
+    let res = make_bio(&mut db.get().unwrap(), &new, &me.user_id);
 
     HttpResponse::Ok().json(res.unwrap())
 }
