@@ -1,6 +1,6 @@
 use actix_web::{
     delete, get, post,
-    web::{self, Json},
+    web::{Data, Query, Path, Json},
     HttpResponse, Responder,
 };
 
@@ -27,8 +27,8 @@ use crate::{
 /// ]
 #[get("/auto/u")]
 pub async fn get_names(
-    state: web::Data<AppState>,
-    prefix: web::Query<Params>,
+    state: Data<AppState>,
+    prefix: Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -54,8 +54,8 @@ pub async fn get_names(
 /// ]
 #[get("/auto/t")]
 pub async fn get_tags(
-    state: web::Data<AppState>,
-    prefix: web::Query<Params>,
+    state: Data<AppState>,
+    prefix: Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -81,8 +81,8 @@ pub async fn get_tags(
 /// ]
 #[get("/auto/p")]
 pub async fn get_posts(
-    state: web::Data<AppState>,
-    prefix: web::Query<Params>,
+    state: Data<AppState>,
+    prefix: Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -144,8 +144,8 @@ pub async fn get_posts(
 /// ]
 #[get("/search/post_title")]
 pub async fn get_post_by_title(
-    state: web::Data<AppState>,
-    title: web::Query<Params>,
+    state: Data<AppState>,
+    title: Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -206,8 +206,8 @@ pub async fn get_post_by_title(
 /// ]
 #[get("/search/post_owner")]
 pub async fn get_post_by_owner(
-    state: web::Data<AppState>,
-    oid: web::Query<Params>,
+    state: Data<AppState>,
+    oid: Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -219,8 +219,8 @@ pub async fn get_post_by_owner(
 /// Looks just like the other two.
 #[get("/search/post_tag")]
 pub async fn get_post_by_tag(
-    state: web::Data<AppState>,
-    tag: web::Query<Params>,
+    state: Data<AppState>,
+    tag: Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -232,8 +232,8 @@ pub async fn get_post_by_tag(
 /// Looks just like the other two.
 #[get("/search/post_tags")]
 pub async fn get_post_by_tags(
-    state: web::Data<AppState>,
-    tag: web::Query<Params>,
+    state: Data<AppState>,
+    tag: Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -275,9 +275,9 @@ pub async fn get_post_by_tags(
 /// }
 #[post("{id}/post/new")]
 pub async fn insert_post(
-    state: web::Data<AppState>,
-    mut new: web::Json<NewPost>,
-    idd: web::Path<i32>,
+    state: Data<AppState>,
+    mut new: Json<NewPost>,
+    idd: Path<i32>,
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -323,9 +323,9 @@ pub async fn insert_post(
 /// }
 #[post("{id}/post/answer")]
 pub async fn answer_to_post(
-    state: web::Data<AppState>,
-    new: web::Json<AnswerPost>,
-    idd: web::Path<i32>,
+    state: Data<AppState>,
+    new: Json<AnswerPost>,
+    idd: Path<i32>,
     _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -372,9 +372,9 @@ pub async fn answer_to_post(
 /// }
 #[post("{id}/post/update")]
 pub async fn update_post(
-    state: web::Data<AppState>,
-    new: web::Json<OldPost>,
-    idd: web::Path<i32>,
+    state: Data<AppState>,
+    new: Json<OldPost>,
+    idd: Path<i32>,
     me: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -416,9 +416,9 @@ pub async fn update_post(
 /// }
 #[delete("{id}/post/delete")]
 pub async fn delete_post(
-    state: web::Data<AppState>,
-    kill: web::Query<ParamsInt>,
-    idd: web::Path<i32>,
+    state: Data<AppState>,
+    kill: Query<ParamsInt>,
+    idd: Path<i32>,
     me: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
@@ -440,8 +440,8 @@ pub async fn delete_post(
 /// }
 #[get("/question/{id}")]
 pub async fn get_question(
-    state: web::Data<AppState>,
-    id: web::Path<i32>,
+    state: Data<AppState>,
+    id: Path<i32>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     use crate::actix_stex::models::Page;
@@ -477,7 +477,7 @@ pub async fn get_question(
 /// 	"last_access_date": "2023-02-23T03:47:24.916123"
 /// }
 #[get("/me")]
-pub async fn whoami(state: web::Data<AppState>, me: JwtMiddleware) -> impl Responder {
+pub async fn whoami(state: Data<AppState>, me: JwtMiddleware) -> impl Responder {
     let db = &state.pool;
 	let I = iam(&mut db.get().unwrap(), &me.user_id.parse().unwrap()).unwrap();
     HttpResponse::Ok().json(I)
@@ -502,7 +502,7 @@ pub async fn whoami(state: web::Data<AppState>, me: JwtMiddleware) -> impl Respo
 /// 	"last_access_date": "2023-02-23T03:47:24.916123"
 /// }
 #[post("/{id}/bio")]
-pub async fn bio(state: web::Data<AppState>, id: web::Path<i32>, new: String) -> impl Responder {
+pub async fn bio(state: Data<AppState>, id: Path<i32>, new: String) -> impl Responder {
     let db = &state.pool;
     let res = make_bio(&mut db.get().unwrap(), &new, &id);
 
