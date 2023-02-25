@@ -37,9 +37,9 @@ pub fn get_all_tagnames(db: &mut PgConnection, prefix: &str) -> Vec<APIResult> {
 
 // Search
 pub fn post_search_title(db: &mut PgConnection, req: &str, ord: &i32) -> Vec<DisplayPost> {
-    use crate::schema::posts::*;
+    use crate::schema::posts::{*, dsl::posts};
     if ord == &0 {
-        dsl::posts
+        posts
         .filter(title.ilike(format!("%{req}%")))
         .filter(parent_id.is_null())
         .order(score)
@@ -48,7 +48,7 @@ pub fn post_search_title(db: &mut PgConnection, req: &str, ord: &i32) -> Vec<Dis
         .unwrap()
     }
     else {
-        dsl::posts
+        posts
         .filter(title.ilike(format!("%{req}%")))
         .filter(parent_id.is_null())
         .order(creation_date.desc())
@@ -60,9 +60,9 @@ pub fn post_search_title(db: &mut PgConnection, req: &str, ord: &i32) -> Vec<Dis
 }
 
 pub fn question_search_owner(db: &mut PgConnection, req: &i32, ord: &i32) -> Vec<DisplayPost> {
-    use crate::schema::posts::*;
+    use crate::schema::posts::{*, dsl::posts};
     if ord == &0 {
-        dsl::posts
+        posts
         .filter(owner_user_id.eq(req))
         .filter(parent_id.is_null())
         .order(score)
@@ -71,7 +71,7 @@ pub fn question_search_owner(db: &mut PgConnection, req: &i32, ord: &i32) -> Vec
         .unwrap()
     }
     else {
-        dsl::posts
+        posts
         .filter(owner_user_id.eq(req))
         .filter(parent_id.is_null())
         .order(creation_date.desc())
@@ -83,9 +83,9 @@ pub fn question_search_owner(db: &mut PgConnection, req: &i32, ord: &i32) -> Vec
 }
 
 pub fn answer_search_owner(db: &mut PgConnection, req: &i32, ord: &i32) -> Vec<DisplayPost> {
-    use crate::schema::posts::*;
+    use crate::schema::posts::{*, dsl::posts};
     if ord == &0 {
-        dsl::posts
+        posts
         .filter(owner_user_id.eq(req))
         .filter(parent_id.is_not_null())
         .order(score)
@@ -94,7 +94,7 @@ pub fn answer_search_owner(db: &mut PgConnection, req: &i32, ord: &i32) -> Vec<D
         .unwrap()
     }
     else {
-        dsl::posts
+        posts
         .filter(owner_user_id.eq(req))
         .filter(parent_id.is_not_null())
         .order(creation_date.desc())
@@ -107,31 +107,25 @@ pub fn answer_search_owner(db: &mut PgConnection, req: &i32, ord: &i32) -> Vec<D
 
 pub fn post_search_tags(db: &mut PgConnection, req: &str, ord: &i32) -> Vec<DisplayPost> {
     use crate::schema::posts::{dsl::posts, *};
-    // posts
-    //     .filter(tags.ilike(format!("%{req}%")))
-    //     .filter(parent_id.is_null())
-    //     .get_results::<DisplayPost>(db)
-    //     .unwrap()
-
-        if ord == &0 {
-            posts
-            .filter(tags.ilike(format!("%{req}%")))
-            .filter(parent_id.is_null())
-            .order(score)
-            .limit(20)
-            .get_results::<DisplayPost>(db)
-            .unwrap()
-        }
-        else {
-            posts
-            .filter(tags.ilike(format!("%{req}%")))
-            .filter(parent_id.is_null())
-            .order(creation_date.desc())
-            .limit(20)
-            .get_results::<DisplayPost>(db)
-            .unwrap()
-        }
-        
+    if ord == &0 {
+        posts
+        .filter(tags.ilike(format!("%{req}%")))
+        .filter(parent_id.is_null())
+        .order(score)
+        .limit(100)
+        .get_results::<DisplayPost>(db)
+        .unwrap()
+    }
+    else {
+        posts
+        .filter(tags.ilike(format!("%{req}%")))
+        .filter(parent_id.is_null())
+        .order(creation_date.desc())
+        .limit(100)
+        .get_results::<DisplayPost>(db)
+        .unwrap()
+    }
+    
 }
 
 pub fn post_search_many_tags(db: &mut PgConnection, req: &str, ord: &i32) -> Vec<DisplayPost> {
