@@ -90,7 +90,7 @@ pub async fn get_qa(
     HttpResponse::Ok().json(all)
 }
 
-/// Post data dump: Provide query thus: "/search/title/[0:score|1:time]?q=title"
+/// Post data dump: Provide query thus: "/search/title?attr=["score"|"time"]&dir=[true|false]&text=title"
 /// Res:
 /// [
 /// {
@@ -142,19 +142,18 @@ pub async fn get_qa(
 ///     "last_activity_date": "2012-12-24T13:28:01.150"
 /// }
 /// ]
-#[get("/search/title/{order}")]
+#[get("/search/title")]
 pub async fn get_question_by_title(
     state: Data<AppState>,
-    title: Query<Params>,
-    order: Path<i32>,
+    order: Query<ParamsAll>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = post_search_title(&mut db.get().unwrap(), &title.q, &order);
+    let post = question_search_title(&mut db.get().unwrap(), &order.text, &order.attr, order.dir);
     HttpResponse::Ok().json(post)
 }
 
-/// Convention: /user/{user_id}/questions/[0:score|1:time]
+/// Convention: /user/{user_id}/questions?attr=["score"|"time"]&dir=[true|false]
 /// Res:
 /// [
 ///    {
@@ -206,19 +205,19 @@ pub async fn get_question_by_title(
 ///        "last_activity_date": "2013-03-02T06:31:46.033"
 ///    }
 /// ]
-#[get("/user/{id}/questions/{order}")]
+#[get("/user/{id}/questions")]
 pub async fn get_questions_by_owner(
     state: Data<AppState>,
     oid: Path<i32>,
-    order: Path<i32>,
+    order: Query<ParamsTwo>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = question_search_owner(&mut db.get().unwrap(), &oid, &order);
+    let post = question_search_owner(&mut db.get().unwrap(), &oid, &order.attr, order.dir);
     HttpResponse::Ok().json(post)
 }
 
-/// Convention: /user/{user_id}/answers/[0:score|1:time]
+/// Convention: /user/{user_id}/answers?attr=["score"|"time"]&dir=[true|false]
 /// Res:
 /// [
 ///    {
@@ -270,43 +269,28 @@ pub async fn get_questions_by_owner(
 ///        "last_activity_date": "2013-03-02T06:31:46.033"
 ///    }
 /// ]
-#[get("/user/{id}/answers/{order}")]
+#[get("/user/{id}/answers")]
 pub async fn get_answers_by_owner(
     state: Data<AppState>,
     oid: Path<i32>,
-    order: Path<i32>,
+    order: Query<ParamsTwo>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = answer_search_owner(&mut db.get().unwrap(), &oid, &order);
+    let post = answer_search_owner(&mut db.get().unwrap(), &oid, &order.attr, order.dir);
     HttpResponse::Ok().json(post)
 }
 
-/// Post data dump: Provide query thus: "/search/tag/[0:score|1:time]?q=<tag_name>".
+/// Post data dump: Provide query thus: "/search/tags?attr=["score"|"time"]&dir=[true|false]&text=<tag_name1><tag_name2>".
 /// Looks just like the other two.
-#[get("/search/tag/{order}")]
-pub async fn get_qa_by_tag(
-    state: Data<AppState>,
-    tag: Query<Params>,
-    order: Path<i32>,
-    // _: JwtMiddleware,
-) -> impl Responder {
-    let db = &state.pool;
-    let post = post_search_tags(&mut db.get().unwrap(), &tag.q, &order);
-    HttpResponse::Ok().json(post)
-}
-
-/// Post data dump: Provide query thus: "/search/tags[0:score|1:time]?q=<tag_name1><tag_name2>".
-/// Looks just like the other two.
-#[get("/search/tags/{order}")]
+#[get("/search/tags")]
 pub async fn get_qa_by_tags(
     state: Data<AppState>,
-    tag: Query<Params>,
-    order: Path<i32>,
+    order: Query<ParamsAll>,
     // _: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = post_search_many_tags(&mut db.get().unwrap(), &tag.q, &order);
+    let post = post_search_many_tags(&mut db.get().unwrap(), &order.text, &order.attr, order.dir);
     HttpResponse::Ok().json(post)
 }
 

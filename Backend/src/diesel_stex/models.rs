@@ -21,10 +21,16 @@ pub struct ParamsInt {
 }
 
 #[derive(Deserialize, Serialize, Queryable, Debug)]
+pub struct ParamsTwo {
+    pub attr: String, //try and make it &str later // Can't, coz weird lifetime errors.
+    pub dir: bool,
+}
+
+#[derive(Deserialize, Serialize, Queryable, Debug)]
 pub struct ParamsAll {
-    pub tag: String, //try and make it &str later // Can't, coz weird lifetime errors.
-    pub uid: i32,
-    pub title: String,
+    pub attr: String, //try and make it &str later // Can't, coz weird lifetime errors.
+    pub dir: bool,
+    pub text: String,
 }
 
 #[derive(Deserialize, Serialize, Queryable, Debug)]

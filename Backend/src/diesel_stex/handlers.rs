@@ -36,87 +36,132 @@ pub fn get_all_tagnames(db: &mut PgConnection, prefix: &str) -> Vec<APIResult> {
 }
 
 // Search
-pub fn post_search_title(db: &mut PgConnection, req: &str, ord: &i32) -> Vec<DisplayPost> {
+pub fn question_search_title(
+    db: &mut PgConnection,
+    req: &str,
+    ord: &str,
+    ad: bool,
+) -> Vec<DisplayPost> {
     use crate::schema::posts::{dsl::posts, *};
-    if ord == &0 {
-        posts
-            .filter(title.ilike(format!("%{req}%")))
-            .filter(parent_id.is_null())
-            .order(score)
-            .limit(20)
-            .get_results::<DisplayPost>(db)
-            .unwrap()
+    let q = posts
+        .filter(title.ilike(format!("%{req}%")))
+        .filter(parent_id.is_null());
+    if ord == "score" {
+        if ad {
+            q.order(score).get_results::<DisplayPost>(db).unwrap()
+        } else {
+            q.order(score.desc())
+                .get_results::<DisplayPost>(db)
+                .unwrap()
+        }
     } else {
-        posts
-            .filter(title.ilike(format!("%{req}%")))
-            .filter(parent_id.is_null())
-            .order(creation_date.desc())
-            .limit(20)
-            .get_results::<DisplayPost>(db)
-            .unwrap()
+        if ad {
+            q.order(creation_date)
+                .get_results::<DisplayPost>(db)
+                .unwrap()
+        } else {
+            q.order(creation_date.desc())
+                .get_results::<DisplayPost>(db)
+                .unwrap()
+        }
     }
 }
 
-pub fn question_search_owner(db: &mut PgConnection, req: &i32, ord: &i32) -> Vec<DisplayPost> {
+pub fn question_search_owner(
+    db: &mut PgConnection,
+    req: &i32,
+    ord: &str,
+    ad: bool,
+) -> Vec<DisplayPost> {
     use crate::schema::posts::{dsl::posts, *};
-    if ord == &0 {
-        posts
-            .filter(owner_user_id.eq(req))
-            .filter(parent_id.is_null())
-            .order(score)
-            .get_results::<DisplayPost>(db)
-            .unwrap()
+    let q = posts
+        .filter(owner_user_id.eq(req))
+        .filter(parent_id.is_null());
+    if ord == "score" {
+        if ad {
+            q.order(score).get_results::<DisplayPost>(db).unwrap()
+        } else {
+            q.order(score.desc())
+                .get_results::<DisplayPost>(db)
+                .unwrap()
+        }
     } else {
-        posts
-            .filter(owner_user_id.eq(req))
-            .filter(parent_id.is_null())
-            .order(creation_date.desc())
-            .get_results::<DisplayPost>(db)
-            .unwrap()
+        if ad {
+            q.order(creation_date)
+                .get_results::<DisplayPost>(db)
+                .unwrap()
+        } else {
+            q.order(creation_date.desc())
+                .get_results::<DisplayPost>(db)
+                .unwrap()
+        }
     }
 }
 
-pub fn answer_search_owner(db: &mut PgConnection, req: &i32, ord: &i32) -> Vec<DisplayPost> {
+pub fn answer_search_owner(
+    db: &mut PgConnection,
+    req: &i32,
+    ord: &str,
+    ad: bool,
+) -> Vec<DisplayPost> {
     use crate::schema::posts::{dsl::posts, *};
-    if ord == &0 {
-        posts
-            .filter(owner_user_id.eq(req))
-            .filter(parent_id.is_not_null())
-            .order(score)
-            .get_results::<DisplayPost>(db)
-            .unwrap()
+    let q = posts
+        .filter(owner_user_id.eq(req))
+        .filter(parent_id.is_not_null());
+    if ord == "score" {
+        if ad {
+            q.order(score).get_results::<DisplayPost>(db).unwrap()
+        } else {
+            q.order(score.desc())
+                .get_results::<DisplayPost>(db)
+                .unwrap()
+        }
     } else {
-        posts
-            .filter(owner_user_id.eq(req))
-            .filter(parent_id.is_not_null())
-            .order(creation_date.desc())
-            .get_results::<DisplayPost>(db)
-            .unwrap()
+        if ad {
+            q.order(creation_date)
+                .get_results::<DisplayPost>(db)
+                .unwrap()
+        } else {
+            q.order(creation_date.desc())
+                .get_results::<DisplayPost>(db)
+                .unwrap()
+        }
     }
 }
 
-pub fn post_search_tags(db: &mut PgConnection, req: &str, ord: &i32) -> Vec<DisplayPost> {
+pub fn post_search_tags(db: &mut PgConnection, req: &str, ord: &str, ad: bool) -> Vec<DisplayPost> {
     use crate::schema::posts::{dsl::posts, *};
-    if ord == &0 {
-        posts
-            .filter(tags.ilike(format!("%{req}%")))
-            .filter(parent_id.is_null())
-            .order(score)
-            .limit(100)
-            .get_results::<DisplayPost>(db)
-            .unwrap()
+    let q = posts
+        .filter(tags.ilike(format!("%{req}%")))
+        .filter(parent_id.is_null());
+
+    if ord == "score" {
+        if ad {
+            q.order(score).get_results::<DisplayPost>(db).unwrap()
+        } else {
+            q.order(score.desc())
+                .get_results::<DisplayPost>(db)
+                .unwrap()
+        }
     } else {
-        posts
-            .filter(tags.ilike(format!("%{req}%")))
-            .filter(parent_id.is_null())
-            .order(creation_date.desc())
-            .limit(100)
-            .get_results::<DisplayPost>(db)
-            .unwrap()
+        if ad {
+            q.order(creation_date)
+                .get_results::<DisplayPost>(db)
+                .unwrap()
+        } else {
+            q.order(creation_date.desc())
+                .get_results::<DisplayPost>(db)
+                .unwrap()
+        }
     }
 }
 
-pub fn post_search_many_tags(db: &mut PgConnection, req: &str, ord: &i32) -> Vec<DisplayPost> {
+pub fn post_search_many_tags(
+    db: &mut PgConnection,
+    req: &str,
+    ord: &str,
+    ad: bool,
+) -> Vec<DisplayPost> {
     let mut v: Vec<String> = req
         .chars()
         .filter(|u| !u.is_whitespace())
@@ -128,7 +173,7 @@ pub fn post_search_many_tags(db: &mut PgConnection, req: &str, ord: &i32) -> Vec
 
     let inds = v
         .iter()
-        .map(|s| post_search_tags(db, s, ord))
+        .map(|s| post_search_tags(db, s, ord, ad))
         .collect::<Vec<Vec<DisplayPost>>>();
     let out = &mut inds[0]
         .iter()
@@ -137,7 +182,7 @@ pub fn post_search_many_tags(db: &mut PgConnection, req: &str, ord: &i32) -> Vec
     for q in inds.iter() {
         out.retain(|x| q.contains(x));
     }
-    out.clone()
+    out[..20].to_vec()
 }
 
 // User stuff

@@ -1,5 +1,5 @@
 #![allow(non_snake_case)]
-#![recursion_limit = "256"]
+#![recursion_limit = "512"]
 use actix_cors::Cors;
 use actix_web::{http::header, middleware::Logger, web::Data, App, HttpServer};
 pub mod actix_stex;
@@ -53,7 +53,6 @@ async fn main() -> std::io::Result<()> {
             .service(get_question_by_title)
             .service(get_questions_by_owner)
             .service(get_answers_by_owner)
-            .service(get_qa_by_tag)
             .service(get_qa_by_tags)
             .service(ask_question)
             .service(give_answer)
