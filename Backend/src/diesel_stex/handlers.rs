@@ -64,7 +64,6 @@ pub fn question_search_owner(db: &mut PgConnection, req: &i32, ord: &i32) -> Vec
             .filter(owner_user_id.eq(req))
             .filter(parent_id.is_null())
             .order(score)
-            .limit(20)
             .get_results::<DisplayPost>(db)
             .unwrap()
     } else {
@@ -72,7 +71,6 @@ pub fn question_search_owner(db: &mut PgConnection, req: &i32, ord: &i32) -> Vec
             .filter(owner_user_id.eq(req))
             .filter(parent_id.is_null())
             .order(creation_date.desc())
-            .limit(20)
             .get_results::<DisplayPost>(db)
             .unwrap()
     }
@@ -85,7 +83,6 @@ pub fn answer_search_owner(db: &mut PgConnection, req: &i32, ord: &i32) -> Vec<D
             .filter(owner_user_id.eq(req))
             .filter(parent_id.is_not_null())
             .order(score)
-            .limit(20)
             .get_results::<DisplayPost>(db)
             .unwrap()
     } else {
@@ -93,7 +90,6 @@ pub fn answer_search_owner(db: &mut PgConnection, req: &i32, ord: &i32) -> Vec<D
             .filter(owner_user_id.eq(req))
             .filter(parent_id.is_not_null())
             .order(creation_date.desc())
-            .limit(20)
             .get_results::<DisplayPost>(db)
             .unwrap()
     }
