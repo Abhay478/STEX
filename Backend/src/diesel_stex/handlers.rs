@@ -88,7 +88,7 @@ pub fn post_search_many_tags(db: &mut PgConnection, req: &str) -> Vec<DisplayPos
         .map(|u| u.clone())
         .collect::<Vec<DisplayPost>>();
     for q in inds.iter() {
-        for d in 0..out.len() {
+        for d in 0..(out.len() - 1) {
             if !q.contains(&out[d]) {
                 out.remove(d);
             }
