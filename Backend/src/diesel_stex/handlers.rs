@@ -182,7 +182,9 @@ pub fn post_search_many_tags(
     for q in inds.iter() {
         out.retain(|x| q.contains(x));
     }
-    out[..20].to_vec()
+    // out[..20].to_vec()
+    out.truncate(20);
+    out.clone()
 }
 
 // User stuff
