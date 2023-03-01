@@ -25,13 +25,15 @@ class AutoCompleteResult extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return TextButton(
       onPressed: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(result.text, style: Theme.of(context).textTheme.titleLarge),
-          Text(result.id.toString(), style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 2),
+          Text(result.text, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 5),
+          Text(result.id.toString(), style: Theme.of(context).textTheme.bodySmall),
           const Divider(),
         ]
       )
@@ -58,7 +60,19 @@ class _SearchPageState extends State<SearchPage> {
   List<CompletionResult> autocompleteResults = [];
   Widget? searchResults;
 
-  final _controller = TextEditingController();
+  final _searchQueryController = TextEditingController();
+  final _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _searchQueryController.dispose();
+    super.dispose();
+  }
 
   void getAutoCompleteResults(String value) async {
     final String val;
@@ -81,19 +95,26 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void autoCompleteResultTap(BuildContext context, CompletionResult result) {
-    // TODO
     if (searchType.name == 'tags') {
       // split the search query by spaces, and replace the last one with the result
-      final List<String> tags = _controller.text.split(' ');
+      final List<String> tags = _searchQueryController.text.split(' ');
       tags[tags.length - 1] = result.text;
       setState(() {
-        _controller.text = tags.join(' ');
+        _searchQueryController.text = '${tags.join(' ')} '; // trailing space to simplify adding more tags
       });
+      _focusNode.requestFocus();
+      _searchQueryController.selection = TextSelection.collapsed(offset: _searchQueryController.text.length);
     } else if (searchType.name == 'users') {
-      // TODO: create user page
+      context.push('/user/${result.id}');
     } else if (searchType.name == 'questions') {
-      context.pushNamed('/question/${result.id}');
+      context.push('/question/${result.id}');
     }
+  }
+
+  void searchButtonTap(BuildContext context) async {
+    final q = Uri.encodeQueryComponent(_searchQueryController.text);
+    final path = searchType.name == 'tags' ? 'tags' : 'posts';
+    context.push('/search/$path?q=$q');
   }
 
   @override
@@ -113,7 +134,13 @@ class _SearchPageState extends State<SearchPage> {
                     decoration: InputDecoration(
                       hintText: searchType.placeholder,
                     ),
-                    controller: _controller,
+                    controller: _searchQueryController,
+                    focusNode: _focusNode,
+                    onSubmitted: (value) {
+                      if (searchType.name != 'users' && autocompleteResults.isNotEmpty) {
+                        autoCompleteResultTap(context, autocompleteResults[0]);
+                      }
+                    },
                     onChanged: (value) => getAutoCompleteResults(value),
                   ),
                 ),
@@ -126,37 +153,37 @@ class _SearchPageState extends State<SearchPage> {
                   onChanged: (value) {
                     setState(() {
                       searchType = value!;
-                      _controller.clear();
+                      autocompleteResults = [];
+                      _searchQueryController.clear();
                     });
                   },
                   value: searchType,
                 ),
                 const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    // TODO
-                  },
-                  child: const Text('Search'),
-                ),
-                const SizedBox(width: 10),
+                if (searchType.name != 'users')
+                  ...[
+                    ElevatedButton(
+                      onPressed: () {
+                        searchButtonTap(context);
+                      },
+                      child: const Text('Search'),
+                    ),
+                    const SizedBox(width: 10),
+                  ]
               ]
             )
           ),
-          //Stack(
-            //// TODO: first child is the search results, second child is the autocomplete results
-            //children: [
-              Expanded(
-                child: ListView(
-                  children: autocompleteResults.map((result) {
-                    return AutoCompleteResult(
-                      result: result,
-                      onTap: () => autoCompleteResultTap(context, result),
-                    );
-                  }).toList(),
-                )
-              )
-            //]
-          //)
+          const Divider(),
+          Expanded(
+            child: ListView(
+              children: autocompleteResults.map((result) {
+                return AutoCompleteResult(
+                  result: result,
+                  onTap: () => autoCompleteResultTap(context, result),
+                );
+              }).toList(),
+            )
+          )
         ]
       ),
     );

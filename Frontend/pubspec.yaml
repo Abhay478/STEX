@@ -40,6 +40,8 @@ dependencies:
   http: ^0.13.5
   flutter_dotenv: ^5.0.2
   provider: ^6.0.5
+  intl: ^0.18.0
+  flutter_html: ^2.2.1
 
 dev_dependencies:
   flutter_test:
