@@ -187,6 +187,10 @@ pub fn post_search_many_tags(
     out.clone()
 }
 
+pub fn uid_unm(db: &mut PgConnection, uid: &i32) -> String {
+    use crate::schema::users::dsl::*;
+    users.filter(id.eq(uid)).select(display_name).get_result::<String>(db).unwrap()
+}
 // User stuff
 pub fn new_post(
     db: &mut PgConnection,
@@ -200,6 +204,7 @@ pub fn new_post(
             &*new,
             owner_user_id.eq(oid),
             id.eq(&get_next_pid(db)),
+            owner_display_name.eq(uid_unm(db, oid)),
             creation_date.eq(chrono::offset::Local::now().naive_utc()),
         ))
         .get_result(db)
@@ -218,6 +223,7 @@ pub fn answer(
             owner_user_id.eq(oid),
             id.eq(&get_next_pid(db)),
             parent_id.eq(par_id),
+            owner_display_name.eq(uid_unm(db, oid)),
             creation_date.eq(chrono::offset::Local::now().naive_utc()),
         ))
         .get_result(db)
