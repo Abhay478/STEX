@@ -162,14 +162,14 @@ pub fn post_search_many_tags(
     ord: &str,
     ad: bool,
 ) -> Vec<DisplayPost> {
-    let mut v: Vec<String> = req
+    let v: Vec<String> = req
         .chars()
         .filter(|u| !u.is_whitespace())
         .collect::<String>()
         .split("<")
+        .skip(1)
         .map(|s| String::from("<") + s)
         .collect();
-    v.remove(0);
 
     let inds = v
         .iter()
@@ -189,7 +189,11 @@ pub fn post_search_many_tags(
 
 pub fn uid_unm(db: &mut PgConnection, uid: &i32) -> String {
     use crate::schema::users::dsl::*;
-    users.filter(id.eq(uid)).select(display_name).get_result::<String>(db).unwrap()
+    users
+        .filter(id.eq(uid))
+        .select(display_name)
+        .get_result::<String>(db)
+        .unwrap()
 }
 // User stuff
 pub fn new_post(
@@ -199,6 +203,9 @@ pub fn new_post(
 ) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
     // new.creation_date = chrono::offset::Local::now().naive_utc();
+    if !are_tags_valid(db, &new.tags) {
+        return Err(diesel::result::Error::AlreadyInTransaction);
+    }
     diesel::insert_into(posts)
         .values((
             &*new,
@@ -218,19 +225,26 @@ pub fn are_tags_valid(db: &mut PgConnection, tgs: &str) -> bool {
     // if &tags[..1] != "<" || &tags[(tags.len() - 1)..] != ">" {
     //     return false;
     // }
-    use crate::schema::posts::dsl::*;
+    use crate::schema::tags::dsl::*;
 
-    let mut v: Vec<String> = tgs
-    .chars()
-    .filter(|u| !u.is_whitespace())
-    .collect::<String>()
-    .split("<")
-    .map(|s| s[..(s.len() - 1)].to_string())
-    .collect();
-    v.remove(0);
+    let v: Vec<String> = tgs
+        .chars()
+        .filter(|u| !u.is_whitespace())
+        .collect::<String>()
+        .split("<")
+        .skip(1)
+        .map(|s| s[..(s.len() - 1)].to_string())
+        .collect();
+    // dbg!(&v);
 
-    let c = posts.filter(tags.eq_any(&v)).count().get_result::<i64>(db).unwrap();
-    c as usize == v.len()
+    let c = tags
+        .filter(tag_name.eq_any(&v))
+        .select(tag_name)
+        .get_results::<String>(db)
+        .unwrap();
+
+    // dbg!(&c);
+    c.len() == v.len()
 }
 
 pub fn answer(
@@ -241,18 +255,19 @@ pub fn answer(
 ) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
     if !are_tags_valid(db, &new.tags) {
-        return Err(diesel::result::Error::NotFound);
+        Err(diesel::result::Error::AlreadyInTransaction)
+    } else {
+        diesel::insert_into(posts)
+            .values((
+                new,
+                owner_user_id.eq(oid),
+                id.eq(&get_next_pid(db)),
+                parent_id.eq(par_id),
+                owner_display_name.eq(uid_unm(db, oid)),
+                creation_date.eq(chrono::offset::Local::now().naive_utc()),
+            ))
+            .get_result(db)
     }
-    diesel::insert_into(posts)
-        .values((
-            new,
-            owner_user_id.eq(oid),
-            id.eq(&get_next_pid(db)),
-            parent_id.eq(par_id),
-            owner_display_name.eq(uid_unm(db, oid)),
-            creation_date.eq(chrono::offset::Local::now().naive_utc()),
-        ))
-        .get_result(db)
 }
 
 pub fn update(
@@ -263,7 +278,7 @@ pub fn update(
 ) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
     if !are_tags_valid(db, &new.tags) {
-        return Err(diesel::result::Error::NotFound);
+        return Err(diesel::result::Error::AlreadyInTransaction);
     }
     diesel::update(posts.filter(owner_user_id.eq(me)).filter(id.eq(it)))
         .set((tags.eq(&new.tags), body.eq(&new.body), title.eq(&new.title)))
