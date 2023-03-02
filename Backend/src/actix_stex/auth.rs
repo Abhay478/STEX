@@ -119,12 +119,14 @@ pub async fn login_user_handler(
                 .is_ok();
 
             if !is_valid {
-                return HttpResponse::Unauthorized()
+                // wrong password
+                return HttpResponse::BadRequest()
                     .json(json!({"status": "fail", "message": "These are not the droids we are looking for."}));
             }
         }
         Err(_e) => {
-            return HttpResponse::BadRequest()
+            // user not found
+            return HttpResponse::NotFound()
                 .json(json!({"status": "fail", "message": "No record."}));
         }
     }
