@@ -10,7 +10,7 @@ use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TokenClaims {
-    pub sub: String,
+    pub sub: i32,
     pub iat: usize,
     pub exp: usize,
 }
@@ -69,8 +69,8 @@ impl FromRequest for JwtMiddleware {
             }
         };
 
-        let user_id = claims.sub.as_str();
-        req.extensions_mut().insert::<String>(user_id.to_owned());
+        let user_id = claims.sub;
+        req.extensions_mut().insert::<i32>(user_id);
 
         ready(Ok(JwtMiddleware {
             user_id: user_id.to_string().parse().unwrap(),

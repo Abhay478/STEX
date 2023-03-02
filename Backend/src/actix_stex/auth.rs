@@ -119,11 +119,13 @@ pub async fn login_user_handler(
     let now = Utc::now();
     let iat = now.timestamp() as usize;
     let exp = (now + Duration::minutes(60)).timestamp() as usize;
-    let claims: TokenClaims = TokenClaims {
-        sub: user.id.to_string(),
+    let claims = TokenClaims {
+        sub: user.id,
         exp,
         iat,
     };
+
+    dbg!(&claims);
 
     let token = encode(
         &Header::default(),

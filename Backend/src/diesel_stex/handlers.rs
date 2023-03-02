@@ -210,6 +210,29 @@ pub fn new_post(
         .get_result(db)
 }
 
+/// true if valid
+pub fn are_tags_valid(db: &mut PgConnection, tgs: &str) -> bool {
+    // if tags.len() == 0 {
+    //     return true;
+    // }
+    // if &tags[..1] != "<" || &tags[(tags.len() - 1)..] != ">" {
+    //     return false;
+    // }
+    use crate::schema::posts::dsl::*;
+
+    let mut v: Vec<String> = tgs
+    .chars()
+    .filter(|u| !u.is_whitespace())
+    .collect::<String>()
+    .split("<")
+    .map(|s| s[..(s.len() - 1)].to_string())
+    .collect();
+    v.remove(0);
+
+    let c = posts.filter(tags.eq_any(&v)).count().get_result::<i64>(db).unwrap();
+    c as usize == v.len()
+}
+
 pub fn answer(
     db: &mut PgConnection,
     new: &AnswerPost,
@@ -217,6 +240,9 @@ pub fn answer(
     par_id: &i32,
 ) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
+    if !are_tags_valid(db, &new.tags) {
+        return Err(diesel::result::Error::NotFound);
+    }
     diesel::insert_into(posts)
         .values((
             new,
@@ -236,6 +262,9 @@ pub fn update(
     me: &i32,
 ) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
+    if !are_tags_valid(db, &new.tags) {
+        return Err(diesel::result::Error::NotFound);
+    }
     diesel::update(posts.filter(owner_user_id.eq(me)).filter(id.eq(it)))
         .set((tags.eq(&new.tags), body.eq(&new.body), title.eq(&new.title)))
         .get_result(db)
