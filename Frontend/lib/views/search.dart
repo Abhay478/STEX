@@ -48,14 +48,8 @@ class SearchPage extends StatefulWidget {
   State<SearchPage> createState() => _SearchPageState();
 }
 
-const _searchTypes = [
-  SearchType('tags', 'Tags', 'Enter space-separated list of tags', 't'),
-  SearchType('users', 'Users', 'Search for a user', 'u'),
-  SearchType('questions', 'Questions', 'Search for a question', 'p'),
-];
-
 class _SearchPageState extends State<SearchPage> {
-  SearchType searchType = _searchTypes[0];
+  SearchType searchType = searchTypes[0];
 
   List<CompletionResult> autocompleteResults = [];
   Widget? searchResults;
@@ -146,7 +140,7 @@ class _SearchPageState extends State<SearchPage> {
                 ),
                 const SizedBox(width: 10),
                 DropdownButton(
-                  items: _searchTypes.map((type) => DropdownMenuItem(
+                  items: searchTypes.map((type) => DropdownMenuItem(
                     value: type,
                     child: Text(type.displayName),
                   )).toList(),

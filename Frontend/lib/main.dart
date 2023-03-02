@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_web_plugins/url_strategy.dart';
+//import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
+import 'package:stex_web/views/sign_in.dart';
+import 'package:stex_web/views/sign_up.dart';
 
-import 'models/user.dart';
+import 'utils/auth.dart';
 import 'views/search_post.dart';
 import 'views/search_tags.dart';
 import 'views/user.dart';
@@ -15,7 +17,7 @@ final _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const HomePage(),
+      builder: (context, state) => HomePage(redraw: state.extra != null),
     ),
     //GoRoute(
       //path: '/login',
@@ -45,11 +47,20 @@ final _router = GoRouter(
       path: '/search/posts',
       builder: (context, state) => SearchPostsPage(searchString: state.queryParams['q'] ?? '')
     ),
+    GoRoute(
+      path: '/sign_in',
+      builder: (context, state) => const SignInPage()
+    ),
+    GoRoute(
+      path: '/sign_up',
+      builder: (context, state) => const SignUpPage()
+    ),
   ]
 );
 
 void main() async {
   //usePathUrlStrategy();
+  await whoami();
   runApp(const MyApp());
 }
 
@@ -65,6 +76,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.orange,
+        //colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.orange),
         useMaterial3: true,
       )
     );

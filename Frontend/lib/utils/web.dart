@@ -2,6 +2,7 @@ import 'dart:convert';
 
 // ignore: unused_import
 import 'package:flutter/foundation.dart'; // used when debugging
+import 'package:http/browser_client.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -9,7 +10,8 @@ import '../models/question.dart';
 
 // TODO: switch to flutter_dotenv?
 const String backendUrl = 'http://localhost:8080';
-final client = http.Client();
+
+BrowserClient client = BrowserClient()..withCredentials = true;
 
 class CompletionResult {
   late final int id;
@@ -40,6 +42,22 @@ class SearchType {
   final String displayName;
   final String placeholder;
   final String route; // used for the URL
+}
+
+const searchTypes = [
+  SearchType('tags', 'Tags', 'Enter space-separated list of tags', 't'),
+  SearchType('users', 'Users', 'Search for a user', 'u'),
+  SearchType('questions', 'Questions', 'Search for a question', 'p'),
+];
+
+Future<http.Response> postJson(Uri uri, dynamic body) async {
+  return client.post(uri,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'credentials': 'include',
+    }, body: jsonEncode(body)
+  );
 }
 
 Future<List<CompletionResult>> getCompletionResults(String value, SearchType type) async {
@@ -149,5 +167,21 @@ Future<QuestionAndAnswers?> getQuestionAndAnswers(String id) async {
   } catch (e) {
     //debugPrint('error getting question and answers: $e');
     return null;
+  }
+}
+
+Future<void> postQuestion(String title, String tags, String body) async {
+  try {
+    final uri = Uri.parse('$backendUrl/qa/question');
+    final response = await postJson(uri, {'title': title, 'body': body, 'tags': tags});
+    if (response.statusCode == 200) {
+      return;
+    } else {
+      //debugPrint('error posting question: ${response.statusCode}');
+      return;
+    }
+  } catch (e) {
+    //debugPrint('error posting question: $e');
+    return;
   }
 }
