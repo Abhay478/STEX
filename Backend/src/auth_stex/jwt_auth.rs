@@ -1,7 +1,7 @@
 use core::fmt;
 use std::future::{ready, Ready};
 
-use crate::AppState;
+use crate::State;
 use actix_web::error::ErrorUnauthorized;
 use actix_web::{dev::Payload, Error as ActixWebError};
 use actix_web::{http, web, FromRequest, HttpMessage, HttpRequest};
@@ -35,7 +35,7 @@ impl FromRequest for JwtMiddleware {
     type Error = ActixWebError;
     type Future = Ready<Result<Self, Self::Error>>;
     fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
-        let data = req.app_data::<web::Data<AppState>>().unwrap();
+        let data = req.app_data::<web::Data<State>>().unwrap();
 
         let token = req
             .cookie("token")

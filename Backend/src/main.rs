@@ -8,7 +8,7 @@ pub mod diesel_stex;
 pub mod schema;
 use actix_stex::auth::*;
 use actix_stex::handlers::*;
-use auth_stex::models::{AppState, Config};
+use auth_stex::models::{State, Config};
 use diesel::{r2d2::ConnectionManager, PgConnection};
 // use log::{debug, error, log_enabled, info, Level};
 
@@ -36,7 +36,7 @@ async fn main() -> std::io::Result<()> {
     before();
     HttpServer::new(move || {
         App::new()
-            .app_data(Data::new(AppState {
+            .app_data(Data::new(State {
                 pool: pool.clone(),
                 env: Config::init(),
             }))

@@ -19,14 +19,14 @@ impl Config {
         }
     }
 }
-pub struct AppState {
+pub struct State {
     pub pool: crate::Pool,
     pub env: Config,
 }
 
-impl AppState {
+impl State {
     pub fn init() -> Self {
-        AppState {
+        State {
             pool: crate::diesel_stex::connect(),
             env: Config::init(),
         }

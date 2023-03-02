@@ -5,7 +5,7 @@ use actix_web::{
 };
 
 use crate::{
-    auth_stex::{jwt_auth::JwtMiddleware, models::AppState},
+    auth_stex::{jwt_auth::JwtMiddleware, models::State},
     diesel_stex::{handlers::*, models::*},
 };
 
@@ -27,7 +27,7 @@ use crate::{
 /// ]
 #[get("/auto/u")]
 pub async fn get_names(
-    state: Data<AppState>,
+    state: Data<State>,
     prefix: Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
@@ -54,7 +54,7 @@ pub async fn get_names(
 /// ]
 #[get("/auto/t")]
 pub async fn get_tags(
-    state: Data<AppState>,
+    state: Data<State>,
     prefix: Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
@@ -81,7 +81,7 @@ pub async fn get_tags(
 /// ]
 #[get("/auto/p")]
 pub async fn get_qa(
-    state: Data<AppState>,
+    state: Data<State>,
     prefix: Query<Params>,
     // _: JwtMiddleware,
 ) -> impl Responder {
@@ -144,7 +144,7 @@ pub async fn get_qa(
 /// ]
 #[get("/search/title")]
 pub async fn get_question_by_title(
-    state: Data<AppState>,
+    state: Data<State>,
     order: Query<ParamsAll>,
     // _: JwtMiddleware,
 ) -> impl Responder {
@@ -207,7 +207,7 @@ pub async fn get_question_by_title(
 /// ]
 #[get("/user/{id}/questions")]
 pub async fn get_questions_by_owner(
-    state: Data<AppState>,
+    state: Data<State>,
     oid: Path<i32>,
     order: Query<ParamsTwo>,
     // _: JwtMiddleware,
@@ -271,7 +271,7 @@ pub async fn get_questions_by_owner(
 /// ]
 #[get("/user/{id}/answers")]
 pub async fn get_answers_by_owner(
-    state: Data<AppState>,
+    state: Data<State>,
     oid: Path<i32>,
     order: Query<ParamsTwo>,
     // _: JwtMiddleware,
@@ -285,7 +285,7 @@ pub async fn get_answers_by_owner(
 /// Looks just like the other two.
 #[get("/search/tags")]
 pub async fn get_qa_by_tags(
-    state: Data<AppState>,
+    state: Data<State>,
     order: Query<ParamsAll>,
     // _: JwtMiddleware,
 ) -> impl Responder {
@@ -327,7 +327,7 @@ pub async fn get_qa_by_tags(
 /// }
 #[post("/qa/question")]
 pub async fn ask_question(
-    state: Data<AppState>,
+    state: Data<State>,
     mut new: Json<NewPost>,
     me: JwtMiddleware,
 ) -> impl Responder {
@@ -378,7 +378,7 @@ pub async fn ask_question(
 /// }
 #[post("/qa/{id}/answer")]
 pub async fn give_answer(
-    state: Data<AppState>,
+    state: Data<State>,
     new: Json<AnswerPost>,
     par: Path<i32>,
     me: JwtMiddleware,
@@ -425,7 +425,7 @@ pub async fn give_answer(
 /// }
 #[post("/qa/{id}/update")]
 pub async fn rephrase_qa(
-    state: Data<AppState>,
+    state: Data<State>,
     new: Json<OldPost>,
     id: Path<i32>,
     me: JwtMiddleware,
@@ -465,7 +465,7 @@ pub async fn rephrase_qa(
 /// }
 #[delete("/qa/{id}/delete")]
 pub async fn delete_qa(
-    state: Data<AppState>,
+    state: Data<State>,
     kill: Path<i32>,
     me: JwtMiddleware,
 ) -> impl Responder {
@@ -485,7 +485,7 @@ pub async fn delete_qa(
 /// }
 #[get("/qa/{id}")]
 pub async fn get_page(
-    state: Data<AppState>,
+    state: Data<State>,
     id: Path<i32>,
     // _: JwtMiddleware,
 ) -> impl Responder {
@@ -522,7 +522,7 @@ pub async fn get_page(
 /// 	"last_access_date": "2023-02-23T03:47:24.916123"
 /// }
 #[get("/me")]
-pub async fn whoami(state: Data<AppState>, me: JwtMiddleware) -> impl Responder {
+pub async fn whoami(state: Data<State>, me: JwtMiddleware) -> impl Responder {
     let db = &state.pool;
     let I = iam(&mut db.get().unwrap(), &me.user_id).unwrap();
     HttpResponse::Ok().json(I)
@@ -547,7 +547,7 @@ pub async fn whoami(state: Data<AppState>, me: JwtMiddleware) -> impl Responder 
 /// 	"last_access_date": "2023-02-23T03:47:24.916123"
 /// }
 #[post("/bio")]
-pub async fn bio(state: Data<AppState>, new: String, me: JwtMiddleware) -> impl Responder {
+pub async fn bio(state: Data<State>, new: String, me: JwtMiddleware) -> impl Responder {
     let db = &state.pool;
     let res = make_bio(&mut db.get().unwrap(), &new, &me.user_id);
 
