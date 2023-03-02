@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stex_web/utils/preview.dart';
 
+import '../utils/preview.dart';
 import '../utils/web.dart';
 import '../utils/app_bar.dart';
 import '../models/question.dart';

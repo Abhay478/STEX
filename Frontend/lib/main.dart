@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 //import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
-import 'package:stex_web/views/sign_in.dart';
-import 'package:stex_web/views/sign_up.dart';
 
+import 'views/sign_in.dart';
+import 'views/sign_up.dart';
 import 'utils/auth.dart';
 import 'views/search_post.dart';
 import 'views/search_tags.dart';

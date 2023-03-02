@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:stex_web/utils/app_bar.dart';
-import 'package:stex_web/utils/globals.dart';
+import '../utils/app_bar.dart';
+import '../utils/globals.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.redraw});

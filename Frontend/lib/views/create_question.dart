@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
-import 'package:stex_web/utils/app_bar.dart';
-import 'package:stex_web/utils/web.dart';
+import '../utils/app_bar.dart';
+import '../utils/web.dart';
 
 class CreateQuestionPage extends StatefulWidget {
   const CreateQuestionPage({super.key});

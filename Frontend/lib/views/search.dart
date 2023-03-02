@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:stex_web/utils/app_bar.dart';
-import 'package:stex_web/utils/web.dart';
+
+import '../utils/app_bar.dart';
+import '../utils/web.dart';
 
 class SearchBar extends StatefulWidget {
   const SearchBar({super.key});
