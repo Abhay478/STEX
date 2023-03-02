@@ -79,7 +79,7 @@ class _SearchPageState extends State<SearchPage> {
     }
 
     final List<CompletionResult> res;
-    if (val.length < 3) {
+    if (val.isEmpty) {
       res = [];
     } else {
       res = await getCompletionResults(val, searchType);
