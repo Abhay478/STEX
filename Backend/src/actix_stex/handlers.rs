@@ -335,7 +335,7 @@ pub async fn ask_question(
     let post = new_post(&mut db.get().unwrap(), &mut new.0, &me.user_id);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
-        Err(e) => HttpResponse::Ok().json(format!(
+        Err(e) => HttpResponse::BadRequest().json(format!(
             "Can't do that: {}.",
             match e {
                 diesel::result::Error::AlreadyInTransaction => "Tag error.".to_string(),
