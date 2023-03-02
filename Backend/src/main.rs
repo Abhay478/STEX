@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 #![recursion_limit = "512"]
 use actix_cors::Cors;
-use actix_web::{http::header, middleware::Logger, web::Data, App, HttpServer};
+use actix_web::{middleware::Logger, web::Data, App, HttpServer};
 pub mod actix_stex;
 pub mod auth_stex;
 pub mod diesel_stex;
@@ -25,12 +25,8 @@ fn before() {
 fn corses() -> Cors {
     Cors::default()
         .allowed_origin("http://localhost:3000")
-        .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
-        .allowed_headers(vec![
-            header::CONTENT_TYPE,
-            header::AUTHORIZATION,
-            header::ACCEPT,
-        ])
+        .allow_any_method()
+        .allow_any_header()
         .supports_credentials()
 }
 
