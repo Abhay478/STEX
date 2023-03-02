@@ -140,16 +140,6 @@ pub struct OldPost {
     pub body: String,
 }
 
-#[derive(Insertable, Serialize, Deserialize)]
-#[diesel(table_name = posts)]
-pub struct AnswerPost {
-    // pub owner_user_id: i32,
-    pub title: String,
-    pub tags: String,
-    pub body: String,
-    // pub parent_id: i32, // the important one
-}
-
 // #[derive(Insertable)]
 // #[diesel(table_name = posts)]
 // pub struct NewPost<'a> {

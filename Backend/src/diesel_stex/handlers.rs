@@ -249,25 +249,21 @@ pub fn are_tags_valid(db: &mut PgConnection, tgs: &str) -> bool {
 
 pub fn answer(
     db: &mut PgConnection,
-    new: &AnswerPost,
+    new: &str,
     oid: &i32,
     par_id: &i32,
 ) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
-    if !are_tags_valid(db, &new.tags) {
-        Err(diesel::result::Error::AlreadyInTransaction)
-    } else {
-        diesel::insert_into(posts)
-            .values((
-                new,
-                owner_user_id.eq(oid),
-                id.eq(&get_next_pid(db)),
-                parent_id.eq(par_id),
-                owner_display_name.eq(uid_unm(db, oid)),
-                creation_date.eq(chrono::offset::Local::now().naive_utc()),
-            ))
-            .get_result(db)
-    }
+    diesel::insert_into(posts)
+        .values((
+            body.eq(new),
+            owner_user_id.eq(oid),
+            id.eq(&get_next_pid(db)),
+            parent_id.eq(par_id),
+            owner_display_name.eq(uid_unm(db, oid)),
+            creation_date.eq(chrono::offset::Local::now().naive_utc()),
+        ))
+        .get_result(db)
 }
 
 pub fn update(

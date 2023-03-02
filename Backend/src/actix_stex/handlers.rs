@@ -345,12 +345,8 @@ pub async fn ask_question(
     }
 }
 
-/// Req:
-/// {
-/// 	"title": "Meh1",
-/// 	"tags": "<meh><answer>",
-/// 	"body": "Meh2",
-/// }
+/// Req: String body.
+/// 
 /// Res: DisplayPost, looks like
 /// {
 ///     "id": 180531,
@@ -379,12 +375,12 @@ pub async fn ask_question(
 #[post("/qa/{id}/answer")]
 pub async fn give_answer(
     state: Data<State>,
-    new: Json<AnswerPost>,
+    new: String,
     par: Path<i32>,
     me: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = answer(&mut db.get().unwrap(), &new.0, &me.user_id, &par);
+    let post = answer(&mut db.get().unwrap(), &new, &me.user_id, &par);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::Ok().json(format!("Can't do that: {}.", e.to_string())),
@@ -464,11 +460,7 @@ pub async fn rephrase_qa(
 ///     "last_activity_date": "2012-12-24T13:28:01.150"
 /// }
 #[delete("/qa/{id}/delete")]
-pub async fn delete_qa(
-    state: Data<State>,
-    kill: Path<i32>,
-    me: JwtMiddleware,
-) -> impl Responder {
+pub async fn delete_qa(state: Data<State>, kill: Path<i32>, me: JwtMiddleware) -> impl Responder {
     let db = &state.pool;
     let post = delete(&mut db.get().unwrap(), &kill, &me.user_id);
     match post {
