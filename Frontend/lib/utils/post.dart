@@ -70,6 +70,9 @@ class PostCard extends StatelessWidget {
                 'body': Style(
                   fontSize: const FontSize(16),
                 ),
+                'pre': Style(
+                  padding: const EdgeInsets.only(left: 40),
+                ),
               }),
             ),
             Align(
