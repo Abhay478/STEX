@@ -189,3 +189,22 @@ Future<dynamic> postQuestion(String title, String tags, String body) async {
     return null;
   }
 }
+
+// post an answer
+// returns post if successful, else null
+Future<Post?> postAnswer(int questionId, String body) async {
+  try {
+    final uri = Uri.parse('$backendUrl/qa/$questionId/answer');
+    final response = await postJson(uri, { 'q': body }); // q is the key for the answer body :shrug:
+    if (response.statusCode == 200) {
+      final Post post = Post.fromJson(jsonDecode(response.body));
+      return post;
+    } else {
+      debugPrint('error posting answer: ${response.statusCode}');
+      return null;
+    }
+  } catch (e) {
+    debugPrint('error posting answer: $e');
+    return null;
+  }
+}
