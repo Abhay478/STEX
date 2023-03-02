@@ -51,11 +51,10 @@ const searchTypes = [
 ];
 
 Future<http.Response> postJson(Uri uri, dynamic body) async {
-  return client.post(uri,
+  return await client.post(uri,
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'credentials': 'include',
     }, body: jsonEncode(body)
   );
 }
@@ -170,18 +169,23 @@ Future<QuestionAndAnswers?> getQuestionAndAnswers(String id) async {
   }
 }
 
-Future<void> postQuestion(String title, String tags, String body) async {
+// post a question
+// returns post.id if successful, false on tag error, null on other error
+Future<dynamic> postQuestion(String title, String tags, String body) async {
   try {
     final uri = Uri.parse('$backendUrl/qa/question');
     final response = await postJson(uri, {'title': title, 'body': body, 'tags': tags});
     if (response.statusCode == 200) {
-      return;
+      final post = jsonDecode(response.body);
+      return post['id'];
+    } else if (response.statusCode == 400) {
+      return false;
     } else {
-      //debugPrint('error posting question: ${response.statusCode}');
-      return;
+      debugPrint('error posting question: ${response.statusCode}');
+      return null;
     }
   } catch (e) {
-    //debugPrint('error posting question: $e');
-    return;
+    debugPrint('error posting question: $e');
+    return null;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
 import '../utils/app_bar.dart';
 import '../utils/web.dart';
@@ -13,7 +14,8 @@ class CreateQuestionPage extends StatefulWidget {
 class _CreateQuestionPageState extends State<CreateQuestionPage> {
 
   String title = "";
-  //String tags = "";
+
+  bool tagError = false;
 
   //final GlobalKey _key = GlobalKey();
   //final FocusNode _focusNode = FocusNode();
@@ -22,11 +24,16 @@ class _CreateQuestionPageState extends State<CreateQuestionPage> {
   final htmlController = HtmlEditorController();
 
   @override
+  void dispose() {
+    _tagsController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(context),
-      body:
-      Column(
+      body: Column(
         children: [
           const SizedBox(height: 10),
           Align(
@@ -37,7 +44,7 @@ class _CreateQuestionPageState extends State<CreateQuestionPage> {
           TextField(
             decoration: const InputDecoration(
               labelText: 'Question Title',
-              hintText: 'Enter a short summary of your problem',
+              hintText: 'Enter a short summary of your question',
             ),
             onChanged: (value) {
               setState(() {
@@ -45,24 +52,21 @@ class _CreateQuestionPageState extends State<CreateQuestionPage> {
               });
             },
           ),
+          // TODO: Tag autocomplete
           TextField(
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Tags',
               hintText: 'Enter a space separated list of tags',
+              errorText: tagError ? 'Invalid tag(s) found' : null,
             ),
             controller: _tagsController,
-            onChanged: (value) {
-              //setState(() {
-                //tags = value;
-              //});
-            },
           ),
           const SizedBox(height: 10),
           HtmlEditor(
             controller: htmlController,
             htmlEditorOptions: const HtmlEditorOptions(
               initialText: '',
-              hint: 'Enter a detailed explanation of your problem',
+              hint: 'Enter a detailed explanation of your question',
               autoAdjustHeight: true,
             ),
           ),
@@ -70,13 +74,19 @@ class _CreateQuestionPageState extends State<CreateQuestionPage> {
           ElevatedButton(
             onPressed: () async {
               String tagList = _tagsController.text.split(' ').map((tag) => tag == '' ? '' : '<$tag>').join();
-              final html = await htmlController.getText();
-              debugPrint({
-                'title': title,
-                'tags': tagList,
-                'body': html,
-              }.toString());
-              postQuestion(title, tagList, html);
+              final htmlText = await htmlController.getText();
+              final post = await postQuestion(title, tagList, htmlText);
+              if (context.mounted) {
+                if (post.runtimeType == int) {
+                  context.push('/question/$post');
+                } else if (post == false) {
+                  setState(() {
+                    tagError = true;
+                  });
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error posting question')));
+                }
+              }
               // TODO: Submit question
             },
             child: const Text('Submit'),

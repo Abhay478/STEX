@@ -57,7 +57,12 @@ PreferredSizeWidget buildAppBar(BuildContext context, { bool isHomePage = false,
           ...[
             const SizedBox(width: 8),
             Center(
-              child: Text("Hello, ${loggedInUser!.name}!", style: Theme.of(context).textTheme.titleMedium),
+              child: TextButton(
+                onPressed: () {
+                  context.push('/user/${loggedInUser!.id}');
+                },
+                child: Text("Hello, ${loggedInUser!.name}!", style: Theme.of(context).textTheme.titleMedium)
+              ),
             ),
             const SizedBox(width: 8),
             Container(
