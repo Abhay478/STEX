@@ -375,12 +375,12 @@ pub async fn ask_question(
 #[post("/qa/{id}/answer")]
 pub async fn give_answer(
     state: Data<State>,
-    new: String,
+    new: Json<String>,
     par: Path<i32>,
     me: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = answer(&mut db.get().unwrap(), &new, &me.user_id, &par);
+    let post = answer(&mut db.get().unwrap(), &new.0, &me.user_id, &par);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::Ok().json(format!("Can't do that: {}.", e.to_string())),
