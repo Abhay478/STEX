@@ -208,3 +208,19 @@ Future<Post?> postAnswer(int questionId, String body) async {
     return null;
   }
 }
+
+Future<bool?> deletePost(int postId) async {
+  try {
+    final uri = Uri.parse('$backendUrl/qa/$postId/delete');
+    final response = await client.delete(uri);
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      debugPrint('error deleting post: ${response.statusCode}');
+      return null;
+    }
+  } catch (e) {
+    debugPrint('error deleting post: $e');
+    return null;
+  }
+}

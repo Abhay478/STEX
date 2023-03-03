@@ -2,6 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:go_router/go_router.dart';
+import 'package:stex_web/utils/globals.dart';
+import 'package:stex_web/utils/web.dart';
 
 import '../models/question.dart';
 
@@ -40,13 +42,15 @@ class AuthorCard extends StatelessWidget {
   }
 }
 
+typedef OnPostDeleted = void Function();
+
 class PostCard extends StatelessWidget {
-  const PostCard({super.key, required this.postType, required this.post, this.isAcceptedAnswer = false});
+  const PostCard({super.key, required this.postType, required this.post, this.isAcceptedAnswer = false, this.onPostDeleted});
 
   final PostType postType;
   final Post post;
-
   final bool isAcceptedAnswer;
+  final OnPostDeleted? onPostDeleted;
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +66,6 @@ class PostCard extends StatelessWidget {
               leading: Text(post.score?.toString() ?? '', style: Theme.of(context).textTheme.headlineSmall),
               title: Text(post.title ?? '', style: Theme.of(context).textTheme.titleLarge),
               subtitle: Text(post.tags ?? '', style: Theme.of(context).textTheme.titleSmall),
-              onTap: () => context.push('/question/${post.id}'),
             ),
             Padding(
               padding: const EdgeInsets.all(10),
@@ -75,9 +78,50 @@ class PostCard extends StatelessWidget {
                 ),
               }),
             ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: AuthorCard(postType: postType, post: post),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (post.ownerUserId == loggedInUser?.id)
+                  ...[
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Delete post'),
+                            content: const Text('Are you sure you want to delete this post?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(true),
+                                style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(Colors.green),
+                                  foregroundColor: MaterialStateProperty.all(Colors.black),
+                                ),
+                                child: const Text('Yes'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(false),
+                                style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(Colors.red),
+                                  foregroundColor: MaterialStateProperty.all(Colors.black),
+                                ),
+                                child: const Text('No'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true) {
+                          await deletePost(post.id!);
+                        }
+                        onPostDeleted?.call();
+                      }
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                AuthorCard(postType: postType, post: post),
+                const SizedBox(width: 10),
+              ],
             ),
           ],
         ),

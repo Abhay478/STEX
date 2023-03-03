@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:stex_web/utils/globals.dart';
 
@@ -45,6 +46,13 @@ class _QuestionPageState extends State<QuestionPage> {
             PostCard(
               postType: PostType.question,
               post: questionAndAnswers!.question,
+              onPostDeleted: () {
+                if (context.mounted) {
+                  // Instead of importing loggedInUser, just use the owner of the question, since
+                  // we know its the same user
+                  context.go('/user/${questionAndAnswers!.question.ownerUserId}');
+                }
+              },
             ),
             Padding(
               padding: const EdgeInsets.all(10),
@@ -126,6 +134,11 @@ class _QuestionPageState extends State<QuestionPage> {
             ...questionAndAnswers!.answers.map((a) => PostCard(
               postType: PostType.answer,
               post: a,
+              onPostDeleted: () {
+                setState(() {
+                  questionAndAnswers!.answers.remove(a);
+                });
+              },
             )),
           ]
         ),
