@@ -1,9 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:html_editor_enhanced/html_editor.dart';
+
+import '../utils/question_editor.dart';
 import '../utils/app_bar.dart';
 import '../utils/web.dart';
 
+class CreateQuestionPage extends StatelessWidget {
+  const CreateQuestionPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: buildAppBar(context),
+      body: Column(
+        children: [
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text('New question', style: Theme.of(context).textTheme.titleLarge)
+          ),
+          const SizedBox(height: 10),
+          QuestionEditor(
+            onSubmit: (title, tagList, htmlText) async {
+              final post = await postQuestion(title, tagList, htmlText);
+              if (post == false) {
+                // tag error
+                return false;
+              }
+              if (context.mounted) {
+                if (post.runtimeType == int) {
+                  // success
+                  context.push('/question/$post');
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error posting question')));
+                }
+              }
+              return true;
+            }, // TODO
+          )
+        ]
+      )
+    );
+  }
+}
+
+/*
 class CreateQuestionPage extends StatefulWidget {
   const CreateQuestionPage({super.key});
 
@@ -87,7 +128,6 @@ class _CreateQuestionPageState extends State<CreateQuestionPage> {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error posting question')));
                 }
               }
-              // TODO: Submit question
             },
             child: const Text('Submit'),
           ),
@@ -96,58 +136,4 @@ class _CreateQuestionPageState extends State<CreateQuestionPage> {
     );
   }
 }
-
-/*
-          RawAutocomplete<CompletionResult>(
-            key: _key,
-            focusNode: _focusNode,
-            textEditingController: _tagsController,
-            displayStringForOption: (option) => option.text,
-            optionsBuilder: (textEditingValue) async {
-              final String val;
-              final List<String> tagList = textEditingValue.text.split(' ');
-              val = tagList[tagList.length - 1];
-              if (val.length < 3) {
-                return const Iterable.empty();
-              }
-              final List<CompletionResult> results = await getCompletionResults(val, searchTypes[0]);
-              return results;
-            },
-            optionsViewBuilder: (context, onSelected, options) {
-              return Material(
-                elevation: 4.0,
-                child: ListView(
-                  shrinkWrap: true,
-                  children: options.map((CompletionResult option) {
-                    return ListTile(
-                      title: Text(option.text),
-                      onTap: () {
-                        onSelected(option);
-                      },
-                    );
-                  }).toList(),
-                )
-              );
-            },
-            onSelected: (CompletionResult selection) {
-              final List<String> tagList = _tagsController.text.split(' ');
-              debugPrint(tagList.toString());
-              tagList[tagList.length - 1] = selection.text;
-              debugPrint(tagList.toString());
-              _tagsController.text = '${tagList.join(' ')} ';
-            },
-            fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
-              return TextField(
-                controller: textEditingController,
-                focusNode: focusNode,
-                decoration: const InputDecoration(
-                  labelText: 'Tags',
-                  hintText: 'Enter a space separated list of tags',
-                ),
-                //onSubmitted: (value) {
-                  //onFieldSubmitted();
-                //},
-              );
-            },
-          ),
 */
