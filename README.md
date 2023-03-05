@@ -27,6 +27,11 @@
   psql cqadb -f init.pgsql
   diesel migration run
   ```
+  
+- Frontend: Create a `Frontend/.env` file with the following contents:
+```
+BACKEND_URL='http://localhost:8080'
+```
 
 ## Running
 
