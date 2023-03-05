@@ -146,3 +146,13 @@ pub struct OldPost {
 //     pub title: &'a str,
 //     pub body: &'a str,
 // }
+#[derive(Insertable, Deserialize, Queryable, Serialize, Debug)]
+#[diesel(table_name = votes)]
+pub struct DisplayVote {
+    pub id: i32,
+    pub user_id: Option<i32>,
+    pub post_id: i32,
+    pub vote_type_id: i16,
+    pub bounty_amount: Option<i16>,
+    pub creation_date: NaiveDateTime,
+}

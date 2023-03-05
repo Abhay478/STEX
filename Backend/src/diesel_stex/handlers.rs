@@ -401,3 +401,76 @@ pub fn make_bio(
         .set(about_me.eq(bio))
         .get_result(db)
 }
+
+pub fn user_upvote(
+    db: &mut PgConnection,
+    they: &i32,
+) -> Result<DisplayUser, diesel::result::Error> {
+    use crate::schema::users::dsl::*;
+    diesel::update(users)
+        .filter(id.eq(they))
+        .set(
+            up_votes.eq(users
+                .select(up_votes)
+                .filter(id.eq(they))
+                .get_result::<Option<i32>>(db)?
+                .unwrap_or_default()
+                + 1),
+        )
+        .get_result::<DisplayUser>(db)
+}
+
+pub fn user_downvote(
+    db: &mut PgConnection,
+    they: &i32,
+) -> Result<DisplayUser, diesel::result::Error> {
+    use crate::schema::users::dsl::*;
+    diesel::update(users)
+        .filter(id.eq(they))
+        .set(
+            up_votes.eq(users
+                .select(up_votes)
+                .filter(id.eq(they))
+                .get_result::<Option<i32>>(db)?
+                .unwrap_or_default()
+                - 1),
+        )
+        .get_result::<DisplayUser>(db)
+}
+
+pub fn vote(
+    db: &mut PgConnection,
+    it: &i32,
+    typ: &i32,
+) -> Result<DisplayPost, diesel::result::Error> {
+    use crate::schema::posts::dsl::*;
+    let they = posts
+        .select(owner_user_id)
+        .filter(id.eq(it))
+        .get_result::<Option<i32>>(db)
+        .unwrap()
+        .unwrap();
+    let u = match typ {
+        1 => user_upvote(db, &they),
+        -1 => user_downvote(db, &they),
+        _ => Err(diesel::result::Error::NotFound),
+    };
+
+    let _u = match u {
+        Ok(d) => d,
+        Err(e) => {
+            return Err(e);
+        }
+    };
+    diesel::update(posts)
+        .filter(id.eq(it))
+        .set(
+            score.eq(posts
+                .select(score)
+                .filter(id.eq(it))
+                .get_result::<i32>(db)
+                .unwrap()
+                + typ),
+        )
+        .get_result(db)
+}

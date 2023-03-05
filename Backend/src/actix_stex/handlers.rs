@@ -345,7 +345,7 @@ pub async fn ask_question(
     }
 }
 
-/// Req: 
+/// Req:
 /// {
 ///     q: String body.
 /// }
@@ -431,6 +431,16 @@ pub async fn rephrase_qa(
     let db = &state.pool;
     let post = update(&mut db.get().unwrap(), &new.0, &id, &me.user_id); // Rush hour vibes.
     match post {
+        Ok(p) => HttpResponse::Ok().json(p),
+        Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),
+    }
+}
+
+#[post("/qa/{id}/vote/{typ}")]
+pub async fn cast_vote(state: Data<State>, id: Path<i32>, typ: Path<i32>) -> impl Responder {
+    let db = &state.pool;
+    let vote = vote(&mut db.get().unwrap(), &id, &typ);
+    match vote {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),
     }
