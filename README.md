@@ -8,17 +8,24 @@
 
 ## One Time Setup
 
-- Backend:
+- Backend: Create a `.env` file in the Backend directory with the following contents:
+  - Database does not need to be created beforehand
+  ```
+  DATABASE_URL=postgres://<username>:<password>@localhost/cqadb
+
+  JWT_SECRET=<any random string>
+  JWT_EXPIRED_IN=60m
+  JWT_MAXAGE=60
+  ```
+  
+- Database initialisation: copy the contents of the csv files generated into the database using the following command:
+  - `init.pgsql` must be in the same directory as the csv files.
+  - Note: Run this after running `diesel migration run` in the Backend, otherwise the tables will not exist.
   ```bash
   cd Backend
   diesel setup
+  psql cqadb -f init.pgsql
   diesel migration run
-  ```
-
-- Frontend:
-  ```bash
-  cd Frontend
-  flutter pub get
   ```
 
 ## Running
@@ -31,7 +38,8 @@
 - Frontend (in a separate terminal):
   ```bash
   cd Frontend
-  flutter pub run
+  flutter pub get
+  flutter run -d web-server --web-port 3000 --web-renderer html
   ```
 - The frontend will be available at `http://localhost:3000`
   
