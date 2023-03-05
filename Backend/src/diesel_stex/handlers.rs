@@ -287,6 +287,7 @@ pub fn delete(
     me: &i32,
 ) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
+    let a = diesel::delete(posts.filter(parent_id.eq(kill))).get_results::<DisplayPost>(db);
     diesel::delete(posts.filter(owner_user_id.eq(me)).filter(id.eq(kill))).get_result(db)
 }
 
