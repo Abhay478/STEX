@@ -1,5 +1,7 @@
 # DBMS-2 (CS3550) : Assignment 2
 
+## Installation and execution instructions
+- 
 ## Summary
 - The application is named STEX, an abbreviation of Stack Exchange - which it is based on.
 - While not a complete replica of https://stackexchange.com, it contains some of the most important features, including

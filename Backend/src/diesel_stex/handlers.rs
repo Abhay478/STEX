@@ -336,6 +336,17 @@ fn get_next_pid(db: &mut PgConnection) -> i32 {
         + 1
 }
 
+fn get_next_vid(db: &mut PgConnection) -> i32 {
+    use crate::schema::votes::dsl::*;
+    votes
+        .select(id)
+        .order(id.desc())
+        .limit(1)
+        .get_result::<i32>(db)
+        .unwrap()
+        + 1
+}
+
 pub fn makeme(db: &mut PgConnection, body: NewUser) -> Result<AccountID, diesel::result::Error> {
     use crate::schema::accounts::dsl::*;
     use crate::schema::users::dsl::*;
@@ -402,75 +413,118 @@ pub fn make_bio(
         .get_result(db)
 }
 
-// pub fn user_upvote(
-//     db: &mut PgConnection,
-//     they: &i32,
-// ) -> Result<DisplayUser, diesel::result::Error> {
-//     use crate::schema::users::dsl::*;
-//     diesel::update(users)
-//         .filter(id.eq(they))
-//         .set(
-//             up_votes.eq(users
-//                 .select(up_votes)
-//                 .filter(id.eq(they))
-//                 .get_result::<Option<i32>>(db)?
-//                 .unwrap_or_default()
-//                 + 1),
-//         )
-//         .get_result::<DisplayUser>(db)
-// }
+pub fn user_upvote(
+    db: &mut PgConnection,
+    they: &i32,
+) -> Result<DisplayUser, diesel::result::Error> {
+    use crate::schema::users::dsl::*;
+    diesel::update(users)
+        .filter(id.eq(they))
+        .set(
+            up_votes.eq(users
+                .select(up_votes)
+                .filter(id.eq(they))
+                .get_result::<Option<i32>>(db)?
+                .unwrap_or_default()
+                + 1),
+        )
+        .get_result::<DisplayUser>(db)
+}
 
-// pub fn user_downvote(
-//     db: &mut PgConnection,
-//     they: &i32,
-// ) -> Result<DisplayUser, diesel::result::Error> {
-//     use crate::schema::users::dsl::*;
-//     diesel::update(users)
-//         .filter(id.eq(they))
-//         .set(
-//             up_votes.eq(users
-//                 .select(up_votes)
-//                 .filter(id.eq(they))
-//                 .get_result::<Option<i32>>(db)?
-//                 .unwrap_or_default()
-//                 - 1),
-//         )
-//         .get_result::<DisplayUser>(db)
-// }
+pub fn user_downvote(
+    db: &mut PgConnection,
+    they: &i32,
+) -> Result<DisplayUser, diesel::result::Error> {
+    use crate::schema::users::dsl::*;
+    diesel::update(users)
+        .filter(id.eq(they))
+        .set(
+            up_votes.eq(users
+                .select(up_votes)
+                .filter(id.eq(they))
+                .get_result::<Option<i32>>(db)?
+                .unwrap_or_default()
+                - 1),
+        )
+        .get_result::<DisplayUser>(db)
+}
 
-// pub fn vote(
-//     db: &mut PgConnection,
-//     it: &i32,
-//     typ: &i32,
-// ) -> Result<DisplayPost, diesel::result::Error> {
-//     use crate::schema::posts::dsl::*;
-//     let they = posts
-//         .select(owner_user_id)
-//         .filter(id.eq(it))
-//         .get_result::<Option<i32>>(db)
-//         .unwrap()
-//         .unwrap();
-//     let u = match typ {
-//         1 => user_upvote(db, &they),
-//         -1 => user_downvote(db, &they),
-//         _ => Err(diesel::result::Error::NotFound),
-//     };
+pub fn valid_vote(db: &mut PgConnection, it: &i32, typ: &i16, me: &i32) -> bool {
+    use crate::schema::votes::dsl::*;
+    let q = votes
+        .select(vote_type_id)
+        .filter(post_id.eq(it))
+        .filter(user_id.eq(me))
+        .get_result::<i16>(db);
 
-//     let _u = match u {
-//         Ok(d) => d,
-//         Err(e) => {
-//             return Err(e);
-//         }
-//     };
-//     diesel::update(posts)
-//         .filter(id.eq(it))
-//         .set(
-//             score.eq(posts
-//                 .select(score)
-//                 .filter(id.eq(it))
-//                 .get_result::<i32>(db)
-//                 .unwrap()
-//                 + typ),
-//         )
-//         .get_result(db)
-// }
+    match q {
+        Ok(v) => match v - typ {
+            0 => false,
+            _ => {
+                let _q = diesel::update(votes)
+                    .filter(user_id.eq(me))
+                    .filter(post_id.eq(it))
+                    .set((
+                        vote_type_id.eq(typ),
+                        creation_date.eq(chrono::offset::Local::now().naive_utc()),
+                    ))
+                    .get_result::<DisplayVote>(db);
+                true
+            }
+        },
+        Err(_) => {
+            let _q = diesel::insert_into(votes)
+                .values((
+                    id.eq(get_next_vid(db)),
+                    post_id.eq(it),
+                    user_id.eq(me),
+                    vote_type_id.eq(typ),
+                    creation_date.eq(chrono::offset::Local::now().naive_utc()),
+                ))
+                .get_result::<DisplayVote>(db);
+            true
+        }
+    }
+
+}
+
+pub fn vote(db: &mut PgConnection, it: &i32, typ: &i16, me: &i32) -> Result<DisplayPost, String> {
+    use crate::schema::posts::dsl::*;
+    if !valid_vote(db, it, typ, me) {
+        return Err("Already voted.".to_string());
+    }
+    let they = posts
+        .select(owner_user_id)
+        .filter(id.eq(it))
+        .get_result::<Option<i32>>(db)
+        .unwrap()
+        .unwrap();
+    let u = match typ {
+        1 => user_upvote(db, &they),
+        -1 => user_downvote(db, &they),
+        _ => Err(diesel::result::Error::NotFound),
+    };
+
+    let _u = match u {
+        Ok(d) => d,
+        Err(_) => {
+            return Err("Wrong vote type.".to_string());
+        }
+    };
+    let out = diesel::update(posts)
+        .filter(id.eq(it))
+        .set(
+            score.eq(posts
+                .select(score)
+                .filter(id.eq(it))
+                .get_result::<i32>(db)
+                .unwrap()
+                + *typ as i32),
+        )
+        .get_result::<DisplayPost>(db);
+
+    match out {
+        Ok(p) => Ok(p),
+        Err(_) => Err("Invalid post id.".to_string()),
+    }
+}

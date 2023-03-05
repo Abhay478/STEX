@@ -436,15 +436,25 @@ pub async fn rephrase_qa(
     }
 }
 
-// #[post("/qa/{id}/vote/{typ}")]
-// pub async fn cast_vote(state: Data<State>, id: Path<i32>, typ: Path<i32>) -> impl Responder {
-//     let db = &state.pool;
-//     let vote = vote(&mut db.get().unwrap(), &id, &typ);
-//     match vote {
-//         Ok(p) => HttpResponse::Ok().json(p),
-//         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),
-//     }
-// }
+#[post("/qa/{id}/up")]
+pub async fn upvote(state: Data<State>, id: Path<i32>, me: JwtMiddleware) -> impl Responder {
+    let db = &state.pool;
+    let vote = vote(&mut db.get().unwrap(), &id, &1, &me.user_id);
+    match vote {
+        Ok(p) => HttpResponse::Ok().json(p),
+        Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {e}.")),
+    }
+}
+
+#[post("/qa/{id}/down")]
+pub async fn downvote(state: Data<State>, id: Path<i32>, me: JwtMiddleware) -> impl Responder {
+    let db = &state.pool;
+    let vote = vote(&mut db.get().unwrap(), &id, &-1, &me.user_id);
+    match vote {
+        Ok(p) => HttpResponse::Ok().json(p),
+        Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {e}.")),
+    }
+}
 
 /// Res: DisplayPost, looks like
 /// {
