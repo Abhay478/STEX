@@ -458,6 +458,11 @@ pub fn user_upvote(
         .get_result::<DisplayUser>(db)
 }
 
+pub fn my_vote(db: &mut PgConnection, it: &i32, me: &i32) -> Result<i16, diesel::result::Error> {
+    use crate::schema::votes::dsl::*;
+    votes.select(vote_type_id).filter(post_id.eq(it)).filter(user_id.eq(me)).get_result(db)
+}
+
 pub fn user_downvote(
     db: &mut PgConnection,
     they: &i32,

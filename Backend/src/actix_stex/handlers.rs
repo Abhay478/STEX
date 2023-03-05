@@ -456,6 +456,16 @@ pub async fn downvote(state: Data<State>, id: Path<i32>, me: JwtMiddleware) -> i
     }
 }
 
+#[get("/qa/{id}/vote")]
+pub async fn get_my_vote(state: Data<State>, id: Path<i32>, me: JwtMiddleware) -> impl Responder {
+    let db = &state.pool;
+    let my_v = my_vote(&mut db.get().unwrap(), &id, &me.user_id);
+    match my_v {
+        Ok(p) => HttpResponse::Ok().json(p),
+        Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {e}.")),
+    }
+}
+
 /// Res: DisplayPost, looks like
 /// {
 ///     "id": 180531,

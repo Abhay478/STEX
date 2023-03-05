@@ -64,6 +64,7 @@ async fn main() -> std::io::Result<()> {
             .service(bio)
             .service(upvote)
             .service(downvote)
+            .service(get_my_vote)
             .wrap(corses())
             .wrap(Logger::default())
     })
