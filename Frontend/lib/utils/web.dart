@@ -8,7 +8,6 @@ import 'package:http/http.dart' as http;
 
 import '../models/question.dart';
 
-// TODO: switch to flutter_dotenv?
 const String backendUrl = 'http://localhost:8080';
 
 BrowserClient client = BrowserClient()..withCredentials = true;
