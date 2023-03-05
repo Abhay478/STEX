@@ -429,7 +429,7 @@ pub async fn rephrase_qa(
     me: JwtMiddleware,
 ) -> impl Responder {
     let db = &state.pool;
-    let post = update(&mut db.get().unwrap(), &new.0, &me.user_id, &id);
+    let post = update(&mut db.get().unwrap(), &new.0, &id, &me.user_id);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),
