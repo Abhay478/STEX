@@ -335,13 +335,10 @@ pub async fn ask_question(
     let post = new_post(&mut db.get().unwrap(), &mut new.0, &me.user_id);
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
-        Err(e) => HttpResponse::BadRequest().json(format!(
-            "Can't do that: {}.",
-            match e {
-                diesel::result::Error::AlreadyInTransaction => "Tag error.".to_string(),
-                _ => e.to_string(),
-            }
-        )),
+        Err(diesel::result::Error::AlreadyInTransaction) => {
+            HttpResponse::Conflict().json(format!("Tag error"))
+        },
+        Err(e) => HttpResponse::BadRequest().json(format!("Can't do that: {}.", e.to_string())),
     }
 }
 
@@ -432,6 +429,9 @@ pub async fn rephrase_qa(
     let post = update(&mut db.get().unwrap(), &new.0, &id, &me.user_id); // Rush hour vibes.
     match post {
         Ok(p) => HttpResponse::Ok().json(p),
+        Err(diesel::result::Error::AlreadyInTransaction) => {
+            HttpResponse::Conflict().json(format!("Tag error"))
+        },
         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),
     }
 }

@@ -178,7 +178,7 @@ Future<dynamic> postQuestion(String title, String tags, String body) async {
     if (response.statusCode == 200) {
       final post = jsonDecode(response.body);
       return post['id'];
-    } else if (response.statusCode == 400) {
+    } else if (response.statusCode == 409) {
       return false;
     } else {
       debugPrint('error posting question: ${response.statusCode}');
