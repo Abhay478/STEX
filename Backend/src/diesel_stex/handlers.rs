@@ -287,7 +287,7 @@ pub fn delete(
     me: &i32,
 ) -> Result<DisplayPost, diesel::result::Error> {
     use crate::schema::posts::dsl::*;
-    let a = diesel::delete(posts.filter(parent_id.eq(kill))).get_results::<DisplayPost>(db);
+    let _a = diesel::delete(posts.filter(parent_id.eq(kill))).get_results::<DisplayPost>(db);
     diesel::delete(posts.filter(owner_user_id.eq(me)).filter(id.eq(kill))).get_result(db)
 }
 
@@ -348,19 +348,24 @@ fn get_next_vid(db: &mut PgConnection) -> i32 {
         + 1
 }
 
-pub fn makeme(db: &mut PgConnection, body: NewUser) -> Result<AccountID, diesel::result::Error> {
-    use crate::schema::accounts::dsl::*;
-    use crate::schema::users::dsl::*;
-    // use super::models::UsersPKey;
+pub fn hash(s: &str) -> String {
     use argon2::{
         password_hash::{rand_core::OsRng, PasswordHasher, SaltString},
         Argon2,
     };
     let salt = SaltString::generate(&mut OsRng);
-    let hashed_password = Argon2::default()
-        .hash_password(body.hash.as_bytes(), &salt)
+    Argon2::default()
+        .hash_password(s.as_bytes(), &salt)
         .expect("Error while hashing password")
-        .to_string();
+        .to_string()
+
+}
+
+pub fn makeme(db: &mut PgConnection, body: NewUser) -> Result<AccountID, diesel::result::Error> {
+    use crate::schema::accounts::dsl::*;
+    use crate::schema::users::dsl::*;
+    // use super::models::UsersPKey;
+    let hashed_password = hash(&body.hash);
 
     let new = UsersPKey {
         id: get_next_uid(db),
@@ -388,9 +393,22 @@ pub fn acc_by_id(db: &mut PgConnection, idd: &i32) -> Result<AccountID, diesel::
 
 pub fn acc_by_unm(db: &mut PgConnection, idd: &str) -> Result<AccountID, diesel::result::Error> {
     use crate::schema::accounts::dsl::*;
-    accounts
+    use crate::schema::users::dsl;
+    let q = accounts
         .filter(username.eq(idd))
-        .get_result::<AccountID>(db)
+        .get_result::<AccountID>(db);
+
+    match q {
+        Ok(u) => Ok(u),
+        Err(_e) => {
+            let old = dsl::users.filter(dsl::display_name.eq(idd)).get_result::<DisplayUser>(db);
+            match old {
+                // Ok(u) => Ok(AccountID {id: u.id, username: Some(u.display_name), password: Some(hash(&u.display_name))}),
+                Ok(u) => makeme(db, NewUser { display_name: u.display_name.clone(), hash: u.display_name, crnd: chrono::offset::Local::now().naive_utc() }),
+                Err(e) => Err(e)
+            }
+        }
+    }
 }
 
 pub fn dupe_acc(db: &mut PgConnection, unm: &str) -> bool {
