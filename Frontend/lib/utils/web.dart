@@ -196,9 +196,8 @@ Future<dynamic> postQuestion(String title, String tags, String body) async {
 Future<bool?> updatePost(String postId, String? title, String? tags, String body) async {
   try {
     final uri = Uri.parse('$backendUrl/qa/$postId/update');
-    final response = await postJson(uri, {'title': title, 'body': body, 'tags': tags});
+    final response = await postJson(uri, {'title': title ?? '', 'body': body, 'tags': tags ?? ''});
     if (response.statusCode == 200) {
-      final post = jsonDecode(response.body);
       return true;
     } else if (response.statusCode == 409) {
       return false;

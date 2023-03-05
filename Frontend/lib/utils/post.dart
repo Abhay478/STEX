@@ -45,12 +45,20 @@ class AuthorCard extends StatelessWidget {
 typedef OnPostDeleted = void Function();
 
 class PostCard extends StatelessWidget {
-  const PostCard({super.key, required this.postType, required this.post, this.isAcceptedAnswer = false, this.onPostDeleted});
+  const PostCard({
+    super.key,
+    required this.postType,
+    required this.post,
+    this.isAcceptedAnswer = false,
+    this.onPostDeleted,
+    this.onEdit,
+  });
 
   final PostType postType;
   final Post post;
   final bool isAcceptedAnswer;
   final OnPostDeleted? onPostDeleted;
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +103,8 @@ class PostCard extends StatelessWidget {
                       onPressed: () => {
                         if (postType == PostType.question) {
                           context.push('/question/${post.id}/edit')
+                        } else {
+                          onEdit?.call()
                         }
                       }
                     ),

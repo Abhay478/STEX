@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
+import 'package:stex_web/utils/answer_editor.dart';
 import 'package:stex_web/utils/globals.dart';
 
 import '../utils/web.dart';
@@ -22,8 +23,9 @@ class _QuestionPageState extends State<QuestionPage> {
 
   QuestionAndAnswers? questionAndAnswers;
 
+  List<bool> isEditingAnswer = [];
+
   bool isAnswering = false;
-  HtmlEditorController answerController = HtmlEditorController();
 
   @override
   void initState() {
@@ -31,6 +33,7 @@ class _QuestionPageState extends State<QuestionPage> {
     getQuestionAndAnswers(widget.questionId).then((qna) {
       setState(() {
         questionAndAnswers = qna;
+        isEditingAnswer = List<bool>.filled(qna!.answers.length, false);
       });
     });
   }
@@ -60,20 +63,21 @@ class _QuestionPageState extends State<QuestionPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('${questionAndAnswers!.answers.length} answers: ', style: Theme.of(context).textTheme.titleLarge),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (loggedInUser == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Login to answer questions'),
-                        ));
-                      } else {
-                        setState(() {
-                          isAnswering = true;
-                        });
-                      }
-                    },
-                    child: const Text('Add Answer'),
-                  )
+                  if (loggedInUser != null && !isAnswering)
+                    ElevatedButton(
+                      onPressed: () {
+                        if (loggedInUser == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text('Login to answer questions'),
+                          ));
+                        } else {
+                          setState(() {
+                            isAnswering = true;
+                          });
+                        }
+                      },
+                      child: const Text('Add Answer'),
+                    )
                 ],
               ),
             ),
@@ -81,65 +85,77 @@ class _QuestionPageState extends State<QuestionPage> {
             if (isAnswering)
               Card(
                 margin: const EdgeInsets.all(10),
-                child: Column(
-                  children: [
-                    HtmlEditor(
-                      controller: answerController,
-                      htmlEditorOptions: const HtmlEditorOptions(
-                        initialText: '',
-                        hint: 'Enter your answer',
-                        autoAdjustHeight: true,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () async {
-                              final answer = await answerController.getText();
-                              if (answer.isEmpty) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                      content: Text('Answer cannot be empty'),
-                                  ));
-                                }
-                                return;
-                              }
-                              final newAnswer = await postAnswer(questionAndAnswers!.question.id!, answer);
-                              setState(() {
-                                questionAndAnswers!.answers.insert(0, newAnswer!);
-                                isAnswering = false;
-                              });
-                            },
-                            child: const Text('Submit'),
-                          ),
-                          const SizedBox(width: 10),
-                          IconButton(
-                            onPressed: () {
-                              answerController.clear();
-                              setState(() {
-                                isAnswering = false;
-                              });
-                            },
-                            icon: const Icon(Icons.delete),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
+                child: AnswerEditor(
+                  onSubmit: (answer) async {
+                    final newAnswer = await postAnswer(questionAndAnswers!.question.id!, answer);
+                    if (!mounted) return false;
+                    if (newAnswer == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Failed to post answer'),
+                      ));
+                      return false;
+                    }
+                    setState(() {
+                      questionAndAnswers!.answers.insert(0, newAnswer);
+                      isEditingAnswer = [false, ...isEditingAnswer];
+                      isAnswering = false;
+                    });
+                    return true;
+                  },
+                  onCancel: () {
+                    setState(() {
+                      isAnswering = false;
+                    });
+                  },
+                )
               ),
-            ...questionAndAnswers!.answers.map((a) => PostCard(
-              postType: PostType.answer,
-              post: a,
-              onPostDeleted: () {
-                setState(() {
-                  questionAndAnswers!.answers.remove(a);
-                });
-              },
-            )),
+              ...Iterable<int>.generate(questionAndAnswers!.answers.length).map((idx) {
+                final answer = questionAndAnswers!.answers[idx];
+                if (!isEditingAnswer[idx]) {
+                  return PostCard(
+                    postType: PostType.answer,
+                    post: answer,
+                    onEdit: () {
+                      setState(() {
+                        isEditingAnswer[idx] = true;
+                      });
+                    },
+                    onPostDeleted: () {
+                      setState(() {
+                        questionAndAnswers!.answers.remove(answer);
+                      });
+                    },
+                  );
+                } else {
+                  // TODO: answer editor
+                  return Card(
+                    margin: const EdgeInsets.all(10),
+                    child: AnswerEditor(
+                      initialText: answer.body ?? '',
+                      onSubmit: (newAnswer) async {
+                        final result = await updatePost(answer.id.toString(), null, null, newAnswer);
+                        if (!mounted) return false;
+                        if (result == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text('Failed to update answer'),
+                          ));
+                          return false;
+                        }
+                        setState(() {
+                          questionAndAnswers!.answers[idx].body = newAnswer;
+                          isEditingAnswer[idx] = false;
+                        });
+                        return true;
+                      },
+                      onCancel: () {
+                        setState(() {
+                          isEditingAnswer[idx] = false;
+                        });
+                      },
+                    )
+                  );
+                }
+              }),
           ]
         ),
     );
