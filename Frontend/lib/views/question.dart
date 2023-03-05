@@ -127,7 +127,6 @@ class _QuestionPageState extends State<QuestionPage> {
                     },
                   );
                 } else {
-                  // TODO: answer editor
                   return Card(
                     margin: const EdgeInsets.all(10),
                     child: AnswerEditor(
