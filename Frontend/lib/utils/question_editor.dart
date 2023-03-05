@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
-
-import 'web.dart';
 
 /// submit updated question
 /// on (tag) error, return false
@@ -23,6 +20,8 @@ class QuestionEditor extends StatefulWidget {
   final String initialBody;
 
   final OnSubmit onSubmit;
+
+  // only for editing
   final VoidCallback? onCancel;
 
   @override
@@ -30,15 +29,15 @@ class QuestionEditor extends StatefulWidget {
 }
 
 class _QuestionEditorState extends State<QuestionEditor> {
-  late String title;
   bool tagError = false;
+  final TextEditingController _titleController = TextEditingController();
   final TextEditingController _tagsController = TextEditingController();
   final htmlController = HtmlEditorController();
 
   @override
   void initState() {
     super.initState();
-    title = widget.initialTitle;
+    _titleController.text = widget.initialTitle;
     _tagsController.text = widget.initialTags;
   }
 
@@ -58,11 +57,7 @@ class _QuestionEditorState extends State<QuestionEditor> {
             labelText: 'Question Title',
             hintText: 'Enter a short summary of your question',
           ),
-          onChanged: (value) {
-            setState(() {
-              title = value;
-            });
-          },
+          controller: _titleController,
         ),
         // TODO: Tag autocomplete
         TextField(
@@ -84,12 +79,13 @@ class _QuestionEditorState extends State<QuestionEditor> {
         ),
         const SizedBox(height: 10),
         Row(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
             ElevatedButton(
               onPressed: () async {
                 String tagList = _tagsController.text.split(' ').map((tag) => tag == '' ? '' : '<$tag>').join();
                 final htmlText = await htmlController.getText();
-                final result = await widget.onSubmit(title, tagList, htmlText);
+                final result = await widget.onSubmit(_titleController.text, tagList, htmlText);
                 if (!result) {
                   setState(() {
                     tagError = true;
@@ -98,6 +94,14 @@ class _QuestionEditorState extends State<QuestionEditor> {
               },
               child: const Text('Submit'),
             ),
+            if (widget.onCancel != null)
+              ...[
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: widget.onCancel,
+                  child: const Text('Cancel'),
+                ),
+              ]
           ],
         ),
       ]

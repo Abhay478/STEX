@@ -190,6 +190,29 @@ Future<dynamic> postQuestion(String title, String tags, String body) async {
   }
 }
 
+/// update a post, either question or answer
+/// title and tags should be null for answers
+/// returns true on success, false on tag error, else null
+Future<bool?> updatePost(String postId, String? title, String? tags, String body) async {
+  try {
+    final uri = Uri.parse('$backendUrl/qa/$postId/update');
+    final response = await postJson(uri, {'title': title, 'body': body, 'tags': tags});
+    if (response.statusCode == 200) {
+      final post = jsonDecode(response.body);
+      return true;
+    } else if (response.statusCode == 409) {
+      return false;
+    } else {
+      debugPrint('error updating post: ${response.statusCode}');
+      debugPrint('error updating post: ${response.body}');
+      return null;
+    }
+  } catch (e) {
+    debugPrint('error updating post: $e');
+    return null;
+  }
+}
+
 // post an answer
 // returns post if successful, else null
 Future<Post?> postAnswer(int questionId, String body) async {

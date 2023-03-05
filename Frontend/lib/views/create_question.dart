@@ -20,23 +20,26 @@ class CreateQuestionPage extends StatelessWidget {
             child: Text('New question', style: Theme.of(context).textTheme.titleLarge)
           ),
           const SizedBox(height: 10),
-          QuestionEditor(
-            onSubmit: (title, tagList, htmlText) async {
-              final post = await postQuestion(title, tagList, htmlText);
-              if (post == false) {
-                // tag error
-                return false;
-              }
-              if (context.mounted) {
-                if (post.runtimeType == int) {
-                  // success
-                  context.push('/question/$post');
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error posting question')));
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: QuestionEditor(
+              onSubmit: (title, tagList, htmlText) async {
+                final post = await postQuestion(title, tagList, htmlText);
+                if (post == false) {
+                  // tag error
+                  return false;
                 }
-              }
-              return true;
-            }, // TODO
+                if (context.mounted) {
+                  if (post.runtimeType == int) {
+                    // success
+                    context.push('/question/$post');
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error posting question')));
+                  }
+                }
+                return true;
+              },
+            ),
           )
         ]
       )

@@ -55,6 +55,13 @@ class PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //return const Placeholder();
+    String score = post.score?.toString() ?? '';
+    String title = '';
+    String tags  = '';
+    if (postType == PostType.question) {
+      title = post.title ?? '';
+      tags = post.tags ?? '';
+    }
     return Card(
       margin: const EdgeInsets.all(10),
       child: Padding(
@@ -63,9 +70,9 @@ class PostCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Text(post.score?.toString() ?? '', style: Theme.of(context).textTheme.headlineSmall),
-              title: Text(post.title ?? '', style: Theme.of(context).textTheme.titleLarge),
-              subtitle: Text(post.tags ?? '', style: Theme.of(context).textTheme.titleSmall),
+              leading: Text(score, style: Theme.of(context).textTheme.headlineSmall),
+              title: Text(title, style: Theme.of(context).textTheme.titleLarge),
+              subtitle: Text(tags, style: Theme.of(context).textTheme.titleSmall),
             ),
             Padding(
               padding: const EdgeInsets.all(10),
@@ -83,6 +90,15 @@ class PostCard extends StatelessWidget {
               children: [
                 if (post.ownerUserId == loggedInUser?.id)
                   ...[
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => {
+                        if (postType == PostType.question) {
+                          context.push('/question/${post.id}/edit')
+                        }
+                      }
+                    ),
+                    const SizedBox(width: 10),
                     IconButton(
                       icon: const Icon(Icons.delete),
                       onPressed: () async {

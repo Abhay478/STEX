@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 //import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
+import 'package:stex_web/views/edit_question.dart';
 
 import 'views/sign_in.dart';
 import 'views/sign_up.dart';
@@ -19,21 +20,21 @@ final _router = GoRouter(
       path: '/',
       builder: (context, state) => HomePage(redraw: state.extra != null),
     ),
-    //GoRoute(
-      //path: '/login',
-      //builder: (context, state) => const LoginPage(),
-    //),
-    GoRoute(
-      path: '/create_question',
-      builder: (context, state) => const CreateQuestionPage(),
-    ),
     GoRoute(
       path: '/search',
       builder: (context, state) => const SearchPage(),
     ),
     GoRoute(
+      path: '/create_question',
+      builder: (context, state) => const CreateQuestionPage(),
+    ),
+    GoRoute(
       path: '/question/:id',
       builder: (context, state) => QuestionPage(questionId: state.params['id']!)
+    ),
+    GoRoute(
+      path: '/question/:id/edit',
+      builder: (context, state) => EditQuestionPage(questionId: state.params['id']!)
     ),
     GoRoute(
       path: '/user/:id',
