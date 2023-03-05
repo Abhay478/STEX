@@ -3,18 +3,23 @@
 ## Installation and execution instructions
 - Rust: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 - Flutter: `https://docs.flutter.dev/get-started/install/linux`
+- Diesel: `cargo install diesel_cli`
   
+
 ## Setup
 - Backend: 
-  - `cd Backend`
-  - `cargo install diesel_cli`
-  - `diesel setup`
-  - `diesel migration run`
-  - `cargo r`
+  ```
+  cd Backend
+  diesel setup
+  diesel migration run
+  cargo r
+  ```
 - Frontend: 
-  - `cd Frontend`
-  - `flutter pub get`
-  - `flutter run -d web-server --web-port 3000 --web-renderer html`
+  ```
+  cd Frontend
+  flutter pub get
+  flutter run -d web-server --web-port 3000 --web-renderer html
+  ```
 - Go to `http://localhost:3000`
   
 ## Summary
