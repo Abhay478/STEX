@@ -5,6 +5,7 @@ final DateFormat formatShort = DateFormat("MMM d, y");
 
 class Post {
   int? id;
+  int? parentId;
   String? title;
   String? tags;
   String? body;
@@ -15,6 +16,7 @@ class Post {
 
   Post.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+    parentId = json['parent_id'];
     title = json['title'];
     tags = json['tags'];
     body = json['body'];

@@ -99,6 +99,22 @@ Future<List<Post>> getUserQuestions(String username, SortOrder sortOrder) async 
   }
 }
 
+Future<List<Post>> getUserAnswers(String username, SortOrder sortOrder) async {
+  try {
+    final uri = Uri.parse('$backendUrl/user/$username/answers').replace(queryParameters: sortOrderMap[sortOrder]!);
+    final response = await client.get(uri);
+    if (response.statusCode == 200) {
+      return Post.listFromJson(jsonDecode(response.body));
+    } else {
+      //debugPrint('error getting user answers: ${response.statusCode}');
+      return [];
+    }
+  } catch (e) {
+    //debugPrint('error getting user answers: $e');
+    return [];
+  }
+}
+
 Future<List<Post>> getTaggedQuestions(String tags, SortOrder sortOrder) async {
   String tagList = tags.split(' ').map((tag) => tag == '' ? '' : '<$tag>').join();
   try {

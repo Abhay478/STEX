@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/app_bar.dart';
+import '../utils/post_list.dart';
 import '../utils/web.dart';
 import './post_list.dart';
 
@@ -12,38 +14,64 @@ class UserPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PostListPage(getQuestions: (ord) async => await getUserQuestions(userId, ord));
+    return Scaffold(
+      appBar: buildAppBar(context),
+      body: ListView(
+        children: [
+          const SizedBox(height: 20),
+          Text('Questions', style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 500,
+            child: PostList(getQuestions: (ord) async => await getUserQuestions(userId, ord))
+          ),
+          const SizedBox(height: 20),
+          Text('Answers', style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 500,
+            child: PostList(getQuestions: (ord) async => await getUserAnswers(userId, ord))
+          ),
+        ],
+      ),
+    );
   }
 }
+/*
+class UserPage extends StatelessWidget {
+  const UserPage({super.key, required this.userId});
 
-//class UserPage extends StatefulWidget {
-  //const UserPage({super.key, required this.userId});
+  final String userId;
 
-  //final String userId;
-
-  //@override
-  //State<UserPage> createState() => _UserPageState();
-//}
-
-//class _UserPageState extends State<UserPage> {
-
-  //List<Post>? questions;
-
-  //@override
-  //void initState() {
-    //super.initState();
-    //getUserQuestions(widget.userId).then((qns) {
-      //setState(() {
-        //questions = qns;
-      //});
-    //});
-  //}
-
-  //@override
-  //Widget build(BuildContext context) {
-    //return Scaffold(
-      //appBar: buildAppBar(context),
-      //body: QuestionPreviewList(questions: questions),
-    //);
-  //}
-//}
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: buildAppBar(context),
+      body: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Column(
+            children: [
+              const SizedBox(height: 20),
+              const Text('Questions'),
+              const SizedBox(height: 20),
+              // TODO: question list
+              PostList(getQuestions: (ord) async => await getUserQuestions(userId, ord)),
+            ]
+          ),
+          Column(
+            children: [
+              const SizedBox(height: 20),
+              const Text('Answers'),
+              const SizedBox(height: 20),
+              // TODO: answer list
+              PostList(getQuestions: (ord) async => await getUserAnswers(userId, ord)),
+            ]
+          ),
+        ]
+      )
+    );
+  }
+}
+*/
