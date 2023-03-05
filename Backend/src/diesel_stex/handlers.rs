@@ -358,7 +358,6 @@ pub fn hash(s: &str) -> String {
         .hash_password(s.as_bytes(), &salt)
         .expect("Error while hashing password")
         .to_string()
-
 }
 
 pub fn makeme(db: &mut PgConnection, body: NewUser) -> Result<AccountID, diesel::result::Error> {
@@ -401,11 +400,20 @@ pub fn acc_by_unm(db: &mut PgConnection, idd: &str) -> Result<AccountID, diesel:
     match q {
         Ok(u) => Ok(u),
         Err(_e) => {
-            let old = dsl::users.filter(dsl::display_name.eq(idd)).get_result::<DisplayUser>(db);
+            let old = dsl::users
+                .filter(dsl::display_name.eq(idd))
+                .get_result::<DisplayUser>(db);
             match old {
                 // Ok(u) => Ok(AccountID {id: u.id, username: Some(u.display_name), password: Some(hash(&u.display_name))}),
-                Ok(u) => makeme(db, NewUser { display_name: u.display_name.clone(), hash: u.display_name, crnd: chrono::offset::Local::now().naive_utc() }),
-                Err(e) => Err(e)
+                Ok(u) => makeme(
+                    db,
+                    NewUser {
+                        display_name: u.display_name.clone(),
+                        hash: u.display_name,
+                        crnd: chrono::offset::Local::now().naive_utc(),
+                    },
+                ),
+                Err(e) => Err(e),
             }
         }
     }
@@ -504,7 +512,6 @@ pub fn valid_vote(db: &mut PgConnection, it: &i32, typ: &i16, me: &i32) -> bool 
             true
         }
     }
-
 }
 
 pub fn vote(db: &mut PgConnection, it: &i32, typ: &i16, me: &i32) -> Result<DisplayPost, String> {

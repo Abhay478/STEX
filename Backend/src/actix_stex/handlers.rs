@@ -337,7 +337,7 @@ pub async fn ask_question(
         Ok(p) => HttpResponse::Ok().json(p),
         Err(diesel::result::Error::AlreadyInTransaction) => {
             HttpResponse::Conflict().json(format!("Tag error"))
-        },
+        }
         Err(e) => HttpResponse::BadRequest().json(format!("Can't do that: {}.", e.to_string())),
     }
 }
@@ -431,7 +431,7 @@ pub async fn rephrase_qa(
         Ok(p) => HttpResponse::Ok().json(p),
         Err(diesel::result::Error::AlreadyInTransaction) => {
             HttpResponse::Conflict().json(format!("Tag error"))
-        },
+        }
         Err(e) => HttpResponse::NotFound().json(format!("Can't do that: {}.", e.to_string())),
     }
 }
